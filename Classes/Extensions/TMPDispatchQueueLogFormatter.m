@@ -13,7 +13,7 @@
 //   to endorse or promote products derived from this software without specific
 //   prior written permission of Deusty, LLC.
 
-#import "DDDispatchQueueLogFormatter.h"
+#import "TMPDispatchQueueLogFormatter.h"
 #import <pthread/pthread.h>
 #import <objc/runtime.h>
 
@@ -21,12 +21,12 @@
 #error This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-#pragma mark - DDDispatchQueueLogFormatter
+#pragma mark - TMPDispatchQueueLogFormatter
 
-@interface DDDispatchQueueLogFormatter () {
-    DDDispatchQueueLogFormatterMode _mode;
+@interface TMPDispatchQueueLogFormatter () {
+    TMPDispatchQueueLogFormatterMode _mode;
     NSString *_dateFormatterKey;
-    DDAtomicCounter *_atomicLoggerCounter;
+    TMPAtomicCounter *_atomicLoggerCounter;
     NSDateFormatter *_threadUnsafeDateFormatter; // Use [self stringFromDate]
     
     pthread_mutex_t _mutex;
@@ -39,11 +39,11 @@
 @end
 
 
-@implementation DDDispatchQueueLogFormatter
+@implementation TMPDispatchQueueLogFormatter
 
 - (instancetype)init {
     if ((self = [super init])) {
-        _mode = DDDispatchQueueLogFormatterModeShareble;
+        _mode = TMPDispatchQueueLogFormatterModeShareble;
 
         // We need to carefully pick the name for storing in thread dictionary to not
         // use a formatter configured by subclass and avoid surprises.
@@ -58,7 +58,7 @@
         // now `cls` is the class that provides implementation for `configureDateFormatter:`
         _dateFormatterKey = [NSString stringWithFormat:@"%s_NSDateFormatter", class_getName(cls)];
 
-        _atomicLoggerCounter = [[DDAtomicCounter alloc] initWithDefaultValue:0];
+        _atomicLoggerCounter = [[TMPAtomicCounter alloc] initWithDefaultValue:0];
         _threadUnsafeDateFormatter = nil;
 
         _minQueueLength = 0;
@@ -74,7 +74,7 @@
     return self;
 }
 
-- (instancetype)initWithMode:(DDDispatchQueueLogFormatterMode)mode {
+- (instancetype)initWithMode:(TMPDispatchQueueLogFormatterMode)mode {
     if ((self = [self init])) {
         _mode = mode;
     }
@@ -117,7 +117,7 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark DDLogFormatter
+#pragma mark TMPLogFormatter
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (NSDateFormatter *)createDateFormatter {
@@ -139,7 +139,7 @@
 - (NSString *)stringFromDate:(NSDate *)date {
 
     NSDateFormatter *dateFormatter = nil;
-    if (_mode == DDDispatchQueueLogFormatterModeNonShareble) {
+    if (_mode == TMPDispatchQueueLogFormatterModeNonShareble) {
         // Single-threaded mode.
 
         dateFormatter = _threadUnsafeDateFormatter;
@@ -165,8 +165,8 @@
     return [dateFormatter stringFromDate:date];
 }
 
-- (NSString *)queueThreadLabelForLogMessage:(DDLogMessage *)logMessage {
-    // As per the DDLogFormatter contract, this method is always invoked on the same thread/dispatch_queue
+- (NSString *)queueThreadLabelForLogMessage:(TMPLogMessage *)logMessage {
+    // As per the TMPLogFormatter contract, this method is always invoked on the same thread/dispatch_queue
 
     NSUInteger minQueueLength = self.minQueueLength;
     NSUInteger maxQueueLength = self.maxQueueLength;
@@ -258,35 +258,35 @@
     }
 }
 
-- (NSString *)formatLogMessage:(DDLogMessage *)logMessage {
+- (NSString *)formatLogMessage:(TMPLogMessage *)logMessage {
     NSString *timestamp = [self stringFromDate:(logMessage->_timestamp)];
     NSString *queueThreadLabel = [self queueThreadLabelForLogMessage:logMessage];
 
     return [NSString stringWithFormat:@"%@ [%@] %@", timestamp, queueThreadLabel, logMessage->_message];
 }
 
-- (void)didAddToLogger:(id <DDLogger>  __attribute__((unused)))logger {
-    NSAssert([_atomicLoggerCounter increment] <= 1 || _mode == DDDispatchQueueLogFormatterModeShareble, @"Can't reuse formatter with multiple loggers in non-shareable mode.");
+- (void)didAddToLogger:(id <TMPLogger>  __attribute__((unused)))logger {
+    NSAssert([_atomicLoggerCounter increment] <= 1 || _mode == TMPDispatchQueueLogFormatterModeShareble, @"Can't reuse formatter with multiple loggers in non-shareable mode.");
 }
 
-- (void)willRemoveFromLogger:(id <DDLogger> __attribute__((unused)))logger {
+- (void)willRemoveFromLogger:(id <TMPLogger> __attribute__((unused)))logger {
     [_atomicLoggerCounter decrement];
 }
 
 @end
 
-#pragma mark - DDAtomicCounter
+#pragma mark - TMPAtomicCounter
 
-#define DD_OSATOMIC_API_DEPRECATED (TARGET_OS_OSX && MAC_OS_X_VERSION_MIN_REQUIRED >= 101200) || (TARGET_OS_IOS && __IPHONE_OS_VERSION_MIN_REQUIRED >= 100000) || (TARGET_OS_WATCH && __WATCH_OS_VERSION_MIN_REQUIRED >= 30000) || (TARGET_OS_TV && __TV_OS_VERSION_MIN_REQUIRED >= 100000)
+#define TMP_OSATOMIC_API_DEPRECATED (TARGET_OS_OSX && MAC_OS_X_VERSION_MIN_REQUIRED >= 101200) || (TARGET_OS_IOS && __IPHONE_OS_VERSION_MIN_REQUIRED >= 100000) || (TARGET_OS_WATCH && __WATCH_OS_VERSION_MIN_REQUIRED >= 30000) || (TARGET_OS_TV && __TV_OS_VERSION_MIN_REQUIRED >= 100000)
 
-#if DD_OSATOMIC_API_DEPRECATED
+#if TMP_OSATOMIC_API_DEPRECATED
 #import <stdatomic.h>
 #else
 #import <libkern/OSAtomic.h>
 #endif
 
-@interface DDAtomicCounter() {
-#if DD_OSATOMIC_API_DEPRECATED
+@interface TMPAtomicCounter() {
+#if TMP_OSATOMIC_API_DEPRECATED
     _Atomic(int32_t) _value;
 #else
     int32_t _value;
@@ -294,7 +294,7 @@
 }
 @end
 
-@implementation DDAtomicCounter
+@implementation TMPAtomicCounter
 
 - (instancetype)initWithDefaultValue:(int32_t)defaultValue {
     if ((self = [super init])) {
@@ -307,7 +307,7 @@
     return _value;
 }
 
-#if DD_OSATOMIC_API_DEPRECATED
+#if TMP_OSATOMIC_API_DEPRECATED
 - (int32_t)increment {
     atomic_fetch_add_explicit(&_value, 1, memory_order_relaxed);
     return _value;

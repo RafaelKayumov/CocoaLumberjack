@@ -16,14 +16,14 @@
 #import <Foundation/Foundation.h>
 
 // Enable 1.9.x legacy macros if imported directly
-#ifndef DD_LEGACY_MACROS
-    #define DD_LEGACY_MACROS 1
+#ifndef TMP_LEGACY_MACROS
+    #define TMP_LEGACY_MACROS 1
 #endif
-// DD_LEGACY_MACROS is checked in the file itself
-#import <CocoaLumberjack/DDLegacyMacros.h>
+// TMP_LEGACY_MACROS is checked in the file itself
+#import <CocoaLumberjack/TMPLegacyMacros.h>
 
 // Names of loggers.
-#import <CocoaLumberjack/DDLoggerNames.h>
+#import <CocoaLumberjack/TMPLoggerNames.h>
 
 #if OS_OBJECT_USE_OBJC
     #define DISPATCH_QUEUE_REFERENCE_TYPE strong
@@ -31,10 +31,10 @@
     #define DISPATCH_QUEUE_REFERENCE_TYPE assign
 #endif
 
-@class DDLogMessage;
-@class DDLoggerInformation;
-@protocol DDLogger;
-@protocol DDLogFormatter;
+@class TMPLogMessage;
+@class TMPLoggerInformation;
+@protocol TMPLogger;
+@protocol TMPLogFormatter;
 
 /**
  * Define the standard options.
@@ -57,12 +57,12 @@
  * However, you still needed to see your error and info log messages.
  * You could accomplish that with the following:
  *
- * static const DDLogLevel ddLogLevel = DDLogFlagError | DDLogFlagInfo;
+ * static const TMPLogLevel tmpLogLevel = TMPLogFlagError | TMPLogFlagInfo;
  *
- * When LOG_LEVEL_DEF is defined as ddLogLevel.
+ * When LOG_LEVEL_DEF is defined as tmpLogLevel.
  *
  * Flags may also be consulted when writing custom log formatters,
- * as the DDLogMessage class captures the individual flag that caused the log message to fire.
+ * as the TMPLogMessage class captures the individual flag that caused the log message to fire.
  *
  * -- Levels --
  *
@@ -75,7 +75,7 @@
  *
  * if (LOG_VERBOSE) {
  *     for (id sprocket in sprockets)
- *         DDLogVerbose(@"sprocket: %@", [sprocket description])
+ *         TMPLogVerbose(@"sprocket: %@", [sprocket description])
  * }
  *
  * -- Async --
@@ -103,71 +103,71 @@
 /**
  *  Flags accompany each log. They are used together with levels to filter out logs.
  */
-typedef NS_OPTIONS(NSUInteger, DDLogFlag){
+typedef NS_OPTIONS(NSUInteger, TMPLogFlag){
     /**
-     *  0...00001 DDLogFlagError
+     *  0...00001 TMPLogFlagError
      */
-    DDLogFlagError      = (1 << 0),
+    TMPLogFlagError      = (1 << 0),
     
     /**
-     *  0...00010 DDLogFlagWarning
+     *  0...00010 TMPLogFlagWarning
      */
-    DDLogFlagWarning    = (1 << 1),
+    TMPLogFlagWarning    = (1 << 1),
     
     /**
-     *  0...00100 DDLogFlagInfo
+     *  0...00100 TMPLogFlagInfo
      */
-    DDLogFlagInfo       = (1 << 2),
+    TMPLogFlagInfo       = (1 << 2),
     
     /**
-     *  0...01000 DDLogFlagDebug
+     *  0...01000 TMPLogFlagDebug
      */
-    DDLogFlagDebug      = (1 << 3),
+    TMPLogFlagDebug      = (1 << 3),
     
     /**
-     *  0...10000 DDLogFlagVerbose
+     *  0...10000 TMPLogFlagVerbose
      */
-    DDLogFlagVerbose    = (1 << 4)
+    TMPLogFlagVerbose    = (1 << 4)
 };
 
 /**
  *  Log levels are used to filter out logs. Used together with flags.
  */
-typedef NS_ENUM(NSUInteger, DDLogLevel){
+typedef NS_ENUM(NSUInteger, TMPLogLevel){
     /**
      *  No logs
      */
-    DDLogLevelOff       = 0,
+    TMPLogLevelOff       = 0,
     
     /**
      *  Error logs only
      */
-    DDLogLevelError     = (DDLogFlagError),
+    TMPLogLevelError     = (TMPLogFlagError),
     
     /**
      *  Error and warning logs
      */
-    DDLogLevelWarning   = (DDLogLevelError   | DDLogFlagWarning),
+    TMPLogLevelWarning   = (TMPLogLevelError   | TMPLogFlagWarning),
     
     /**
      *  Error, warning and info logs
      */
-    DDLogLevelInfo      = (DDLogLevelWarning | DDLogFlagInfo),
+    TMPLogLevelInfo      = (TMPLogLevelWarning | TMPLogFlagInfo),
     
     /**
      *  Error, warning, info and debug logs
      */
-    DDLogLevelDebug     = (DDLogLevelInfo    | DDLogFlagDebug),
+    TMPLogLevelDebug     = (TMPLogLevelInfo    | TMPLogFlagDebug),
     
     /**
      *  Error, warning, info, debug and verbose logs
      */
-    DDLogLevelVerbose   = (DDLogLevelDebug   | DDLogFlagVerbose),
+    TMPLogLevelVerbose   = (TMPLogLevelDebug   | TMPLogFlagVerbose),
     
     /**
      *  All logs (1...11111)
      */
-    DDLogLevelAll       = NSUIntegerMax
+    TMPLogLevelAll       = NSUIntegerMax
 };
 
 NS_ASSUME_NONNULL_BEGIN
@@ -180,20 +180,20 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @return the file name
  */
-FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
+FOUNDATION_EXTERN NSString * __nullable TMPExtractFileNameWithoutExtension(const char *filePath, BOOL copy);
 
 /**
  * The THIS_FILE macro gives you an NSString of the file name.
  * For simplicity and clarity, the file name does not include the full path or file extension.
  *
- * For example: DDLogWarn(@"%@: Unable to find thingy", THIS_FILE) -> @"MyViewController: Unable to find thingy"
+ * For example: TMPLogWarn(@"%@: Unable to find thingy", THIS_FILE) -> @"MyViewController: Unable to find thingy"
  **/
-#define THIS_FILE         (DDExtractFileNameWithoutExtension(__FILE__, NO))
+#define THIS_FILE         (TMPExtractFileNameWithoutExtension(__FILE__, NO))
 
 /**
  * The THIS_METHOD macro gives you the name of the current objective-c method.
  *
- * For example: DDLogWarn(@"%@ - Requires non-nil strings", THIS_METHOD) -> @"setMake:model: requires non-nil strings"
+ * For example: TMPLogWarn(@"%@ - Requires non-nil strings", THIS_METHOD) -> @"setMake:model: requires non-nil strings"
  *
  * Note: This does NOT work in straight C functions (non objective-c).
  * Instead you should use the predefined __FUNCTION__ macro.
@@ -207,15 +207,15 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
 
 /**
  *  The main class, exposes all logging mechanisms, loggers, ...
- *  For most of the users, this class is hidden behind the logging functions like `DDLogInfo`
+ *  For most of the users, this class is hidden behind the logging functions like `TMPLogInfo`
  */
-@interface DDLog : NSObject
+@interface TMPLog : NSObject
 
 /**
- *  Returns the singleton `DDLog`.
- *  The instance is used by `DDLog` class methods.
+ *  Returns the singleton `TMPLog`.
+ *  The instance is used by `TMPLog` class methods.
  */
-@property (class, nonatomic, strong, readonly) DDLog *sharedInstance;
+@property (class, nonatomic, strong, readonly) TMPLog *sharedInstance;
 
 /**
  * Provides access to the underlying logging queue.
@@ -240,8 +240,8 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  *  @param format       the log format
  */
 + (void)log:(BOOL)asynchronous
-      level:(DDLogLevel)level
-       flag:(DDLogFlag)flag
+      level:(TMPLogLevel)level
+       flag:(TMPLogFlag)flag
     context:(NSInteger)context
        file:(const char *)file
    function:(const char *)function
@@ -266,8 +266,8 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  *  @param format       the log format
  */
 - (void)log:(BOOL)asynchronous
-      level:(DDLogLevel)level
-       flag:(DDLogFlag)flag
+      level:(TMPLogLevel)level
+       flag:(TMPLogFlag)flag
     context:(NSInteger)context
        file:(const char *)file
    function:(const char *)function
@@ -293,8 +293,8 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  *  @param argList      the arguments list as a va_list
  */
 + (void)log:(BOOL)asynchronous
-      level:(DDLogLevel)level
-       flag:(DDLogFlag)flag
+      level:(TMPLogLevel)level
+       flag:(TMPLogFlag)flag
     context:(NSInteger)context
        file:(const char *)file
    function:(const char *)function
@@ -321,8 +321,8 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  *  @param argList      the arguments list as a va_list
  */
 - (void)log:(BOOL)asynchronous
-      level:(DDLogLevel)level
-       flag:(DDLogFlag)flag
+      level:(TMPLogLevel)level
+       flag:(TMPLogFlag)flag
     context:(NSInteger)context
        file:(const char *)file
    function:(const char *)function
@@ -334,24 +334,24 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
 /**
  * Logging Primitive.
  *
- * This method can be used if you manually prepared DDLogMessage.
+ * This method can be used if you manually prepared TMPLogMessage.
  *
  *  @param asynchronous YES if the logging is done async, NO if you want to force sync
- *  @param logMessage   the log message stored in a `DDLogMessage` model object
+ *  @param logMessage   the log message stored in a `TMPLogMessage` model object
  */
 + (void)log:(BOOL)asynchronous
-    message:(DDLogMessage *)logMessage NS_SWIFT_NAME(log(asynchronous:message:));
+    message:(TMPLogMessage *)logMessage NS_SWIFT_NAME(log(asynchronous:message:));
 
 /**
  * Logging Primitive.
  *
- * This method can be used if you manually prepared DDLogMessage.
+ * This method can be used if you manually prepared TMPLogMessage.
  *
  *  @param asynchronous YES if the logging is done async, NO if you want to force sync
- *  @param logMessage   the log message stored in a `DDLogMessage` model object
+ *  @param logMessage   the log message stored in a `TMPLogMessage` model object
  */
 - (void)log:(BOOL)asynchronous
-    message:(DDLogMessage *)logMessage NS_SWIFT_NAME(log(asynchronous:message:));
+    message:(TMPLogMessage *)logMessage NS_SWIFT_NAME(log(asynchronous:message:));
 
 /**
  * Since logging can be asynchronous, there may be times when you want to flush the logs.
@@ -378,54 +378,16 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
 /**
  * Adds the logger to the system.
  *
- * This is equivalent to invoking `[DDLog addLogger:logger withLogLevel:DDLogLevelAll]`.
+ * This is equivalent to invoking `[TMPLog addLogger:logger withLogLevel:TMPLogLevelAll]`.
  **/
-+ (void)addLogger:(id <DDLogger>)logger;
++ (void)addLogger:(id <TMPLogger>)logger;
 
 /**
  * Adds the logger to the system.
  *
- * This is equivalent to invoking `[DDLog addLogger:logger withLogLevel:DDLogLevelAll]`.
+ * This is equivalent to invoking `[TMPLog addLogger:logger withLogLevel:TMPLogLevelAll]`.
  **/
-- (void)addLogger:(id <DDLogger>)logger;
-
-/**
- * Adds the logger to the system.
- *
- * The level that you provide here is a preemptive filter (for performance).
- * That is, the level specified here will be used to filter out logMessages so that
- * the logger is never even invoked for the messages.
- *
- * More information:
- * When you issue a log statement, the logging framework iterates over each logger,
- * and checks to see if it should forward the logMessage to the logger.
- * This check is done using the level parameter passed to this method.
- *
- * For example:
- *
- * `[DDLog addLogger:consoleLogger withLogLevel:DDLogLevelVerbose];`
- * `[DDLog addLogger:fileLogger    withLogLevel:DDLogLevelWarning];`
- *
- * `DDLogError(@"oh no");` => gets forwarded to consoleLogger & fileLogger
- * `DDLogInfo(@"hi");`     => gets forwarded to consoleLogger only
- *
- * It is important to remember that Lumberjack uses a BITMASK.
- * Many developers & third party frameworks may define extra log levels & flags.
- * For example:
- *
- * `#define SOME_FRAMEWORK_LOG_FLAG_TRACE (1 << 6) // 0...1000000`
- *
- * So if you specify `DDLogLevelVerbose` to this method, you won't see the framework's trace messages.
- *
- * `(SOME_FRAMEWORK_LOG_FLAG_TRACE & DDLogLevelVerbose) => (01000000 & 00011111) => NO`
- *
- * Consider passing `DDLogLevelAll` to this method, which has all bits set.
- * You can also use the exclusive-or bitwise operator to get a bitmask that has all flags set,
- * except the ones you explicitly don't want. For example, if you wanted everything except verbose & debug:
- *
- * `((DDLogLevelAll ^ DDLogLevelVerbose) | DDLogLevelInfo)`
- **/
-+ (void)addLogger:(id <DDLogger>)logger withLevel:(DDLogLevel)level;
+- (void)addLogger:(id <TMPLogger>)logger;
 
 /**
  * Adds the logger to the system.
@@ -441,11 +403,11 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  *
  * For example:
  *
- * `[DDLog addLogger:consoleLogger withLogLevel:DDLogLevelVerbose];`
- * `[DDLog addLogger:fileLogger    withLogLevel:DDLogLevelWarning];`
+ * `[TMPLog addLogger:consoleLogger withLogLevel:TMPLogLevelVerbose];`
+ * `[TMPLog addLogger:fileLogger    withLogLevel:TMPLogLevelWarning];`
  *
- * `DDLogError(@"oh no");` => gets forwarded to consoleLogger & fileLogger
- * `DDLogInfo(@"hi");`     => gets forwarded to consoleLogger only
+ * `TMPLogError(@"oh no");` => gets forwarded to consoleLogger & fileLogger
+ * `TMPLogInfo(@"hi");`     => gets forwarded to consoleLogger only
  *
  * It is important to remember that Lumberjack uses a BITMASK.
  * Many developers & third party frameworks may define extra log levels & flags.
@@ -453,27 +415,65 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  *
  * `#define SOME_FRAMEWORK_LOG_FLAG_TRACE (1 << 6) // 0...1000000`
  *
- * So if you specify `DDLogLevelVerbose` to this method, you won't see the framework's trace messages.
+ * So if you specify `TMPLogLevelVerbose` to this method, you won't see the framework's trace messages.
  *
- * `(SOME_FRAMEWORK_LOG_FLAG_TRACE & DDLogLevelVerbose) => (01000000 & 00011111) => NO`
+ * `(SOME_FRAMEWORK_LOG_FLAG_TRACE & TMPLogLevelVerbose) => (01000000 & 00011111) => NO`
  *
- * Consider passing `DDLogLevelAll` to this method, which has all bits set.
+ * Consider passing `TMPLogLevelAll` to this method, which has all bits set.
  * You can also use the exclusive-or bitwise operator to get a bitmask that has all flags set,
  * except the ones you explicitly don't want. For example, if you wanted everything except verbose & debug:
  *
- * `((DDLogLevelAll ^ DDLogLevelVerbose) | DDLogLevelInfo)`
+ * `((TMPLogLevelAll ^ TMPLogLevelVerbose) | TMPLogLevelInfo)`
  **/
-- (void)addLogger:(id <DDLogger>)logger withLevel:(DDLogLevel)level;
++ (void)addLogger:(id <TMPLogger>)logger withLevel:(TMPLogLevel)level;
+
+/**
+ * Adds the logger to the system.
+ *
+ * The level that you provide here is a preemptive filter (for performance).
+ * That is, the level specified here will be used to filter out logMessages so that
+ * the logger is never even invoked for the messages.
+ *
+ * More information:
+ * When you issue a log statement, the logging framework iterates over each logger,
+ * and checks to see if it should forward the logMessage to the logger.
+ * This check is done using the level parameter passed to this method.
+ *
+ * For example:
+ *
+ * `[TMPLog addLogger:consoleLogger withLogLevel:TMPLogLevelVerbose];`
+ * `[TMPLog addLogger:fileLogger    withLogLevel:TMPLogLevelWarning];`
+ *
+ * `TMPLogError(@"oh no");` => gets forwarded to consoleLogger & fileLogger
+ * `TMPLogInfo(@"hi");`     => gets forwarded to consoleLogger only
+ *
+ * It is important to remember that Lumberjack uses a BITMASK.
+ * Many developers & third party frameworks may define extra log levels & flags.
+ * For example:
+ *
+ * `#define SOME_FRAMEWORK_LOG_FLAG_TRACE (1 << 6) // 0...1000000`
+ *
+ * So if you specify `TMPLogLevelVerbose` to this method, you won't see the framework's trace messages.
+ *
+ * `(SOME_FRAMEWORK_LOG_FLAG_TRACE & TMPLogLevelVerbose) => (01000000 & 00011111) => NO`
+ *
+ * Consider passing `TMPLogLevelAll` to this method, which has all bits set.
+ * You can also use the exclusive-or bitwise operator to get a bitmask that has all flags set,
+ * except the ones you explicitly don't want. For example, if you wanted everything except verbose & debug:
+ *
+ * `((TMPLogLevelAll ^ TMPLogLevelVerbose) | TMPLogLevelInfo)`
+ **/
+- (void)addLogger:(id <TMPLogger>)logger withLevel:(TMPLogLevel)level;
 
 /**
  *  Remove the logger from the system
  */
-+ (void)removeLogger:(id <DDLogger>)logger;
++ (void)removeLogger:(id <TMPLogger>)logger;
 
 /**
  *  Remove the logger from the system
  */
-- (void)removeLogger:(id <DDLogger>)logger;
+- (void)removeLogger:(id <TMPLogger>)logger;
 
 /**
  *  Remove all the current loggers
@@ -488,22 +488,22 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
 /**
  *  Return all the current loggers
  */
-@property (class, nonatomic, copy, readonly) NSArray<id<DDLogger>> *allLoggers;
+@property (class, nonatomic, copy, readonly) NSArray<id<TMPLogger>> *allLoggers;
 
 /**
  *  Return all the current loggers
  */
-@property (nonatomic, copy, readonly) NSArray<id<DDLogger>> *allLoggers;
+@property (nonatomic, copy, readonly) NSArray<id<TMPLogger>> *allLoggers;
 
 /**
- *  Return all the current loggers with their level (aka DDLoggerInformation).
+ *  Return all the current loggers with their level (aka TMPLoggerInformation).
  */
-@property (class, nonatomic, copy, readonly) NSArray<DDLoggerInformation *> *allLoggersWithLevel;
+@property (class, nonatomic, copy, readonly) NSArray<TMPLoggerInformation *> *allLoggersWithLevel;
 
 /**
- *  Return all the current loggers with their level (aka DDLoggerInformation).
+ *  Return all the current loggers with their level (aka TMPLoggerInformation).
  */
-@property (nonatomic, copy, readonly) NSArray<DDLoggerInformation *> *allLoggersWithLevel;
+@property (nonatomic, copy, readonly) NSArray<TMPLoggerInformation *> *allLoggersWithLevel;
 
 /**
  * Registered Dynamic Logging
@@ -527,14 +527,14 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  *
  *  @param aClass `Class` param
  */
-+ (DDLogLevel)levelForClass:(Class)aClass;
++ (TMPLogLevel)levelForClass:(Class)aClass;
 
 /**
  *  Returns the current log level for a certain class
  *
  *  @param aClassName string param
  */
-+ (DDLogLevel)levelForClassWithName:(NSString *)aClassName;
++ (TMPLogLevel)levelForClassWithName:(NSString *)aClassName;
 
 /**
  *  Set the log level for a certain class
@@ -542,7 +542,7 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  *  @param level  the new level
  *  @param aClass `Class` param
  */
-+ (void)setLevel:(DDLogLevel)level forClass:(Class)aClass;
++ (void)setLevel:(TMPLogLevel)level forClass:(Class)aClass;
 
 /**
  *  Set the log level for a certain class
@@ -550,7 +550,7 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  *  @param level      the new level
  *  @param aClassName string param
  */
-+ (void)setLevel:(DDLogLevel)level forClassWithName:(NSString *)aClassName;
++ (void)setLevel:(TMPLogLevel)level forClassWithName:(NSString *)aClassName;
 
 @end
 
@@ -563,14 +563,14 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  *  Basically, it can log messages, store a logFormatter plus a bunch of optional behaviors.
  *  (i.e. flush, get its loggerQueue, get its name, ...
  */
-@protocol DDLogger <NSObject>
+@protocol TMPLogger <NSObject>
 
 /**
  *  The log message method
  *
  *  @param logMessage the message (model)
  */
-- (void)logMessage:(DDLogMessage *)logMessage NS_SWIFT_NAME(log(message:));
+- (void)logMessage:(TMPLogMessage *)logMessage NS_SWIFT_NAME(log(message:));
 
 /**
  * Formatters may optionally be added to any logger.
@@ -578,7 +578,7 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  * If no formatter is set, the logger simply logs the message as it is given in logMessage,
  * or it may use its own built in formatting style.
  **/
-@property (nonatomic, strong) id <DDLogFormatter> logFormatter;
+@property (nonatomic, strong) id <TMPLogFormatter> logFormatter;
 
 @optional
 
@@ -618,9 +618,9 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  * For example, a database logger may only save occasionally as the disk IO is slow.
  * In such loggers, this method should be implemented to flush any pending IO.
  *
- * This allows invocations of DDLog's flushLog method to be propogated to loggers that need it.
+ * This allows invocations of TMPLog's flushLog method to be propogated to loggers that need it.
  *
- * Note that DDLog's flushLog method is invoked automatically when the application quits,
+ * Note that TMPLog's flushLog method is invoked automatically when the application quits,
  * and it may be also invoked manually by the developer prior to application crashes, or other such reasons.
  **/
 - (void)flush;
@@ -638,7 +638,7 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  * The created queue will receive its name from this method.
  * This may be helpful for debugging or profiling reasons.
  **/
-@property (copy, nonatomic, readonly) DDLoggerName loggerName;
+@property (copy, nonatomic, readonly) TMPLoggerName loggerName;
 
 @end
 
@@ -649,7 +649,7 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
 /**
  *  This protocol describes the behavior of a log formatter
  */
-@protocol DDLogFormatter <NSObject>
+@protocol TMPLogFormatter <NSObject>
 @required
 
 /**
@@ -663,7 +663,7 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  * The formatter may also optionally filter the log message by returning nil,
  * in which case the logger will not log the message.
  **/
-- (NSString * __nullable)formatLogMessage:(DDLogMessage *)logMessage NS_SWIFT_NAME(format(message:));
+- (NSString * __nullable)formatLogMessage:(TMPLogMessage *)logMessage NS_SWIFT_NAME(format(message:));
 
 @optional
 
@@ -676,7 +676,7 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  * Or if a formatter has potentially thread-unsafe code (e.g. NSDateFormatter),
  * it could possibly use these hooks to switch to thread-safe versions of the code.
  **/
-- (void)didAddToLogger:(id <DDLogger>)logger;
+- (void)didAddToLogger:(id <TMPLogger>)logger;
 
 /**
  * A single formatter instance can be added to multiple loggers.
@@ -688,12 +688,12 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  * it could possibly use these hooks to switch to thread-safe versions of the code or use dispatch_set_specific()
 .* to add its own specific values.
  **/
-- (void)didAddToLogger:(id <DDLogger>)logger inQueue:(dispatch_queue_t)queue;
+- (void)didAddToLogger:(id <TMPLogger>)logger inQueue:(dispatch_queue_t)queue;
 
 /**
  *  See the above description for `didAddToLogger:`
  */
-- (void)willRemoveFromLogger:(id <DDLogger>)logger;
+- (void)willRemoveFromLogger:(id <TMPLogger>)logger;
 
 @end
 
@@ -704,7 +704,7 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
 /**
  *  This protocol describes a dynamic logging component
  */
-@protocol DDRegisteredDynamicLogging
+@protocol TMPRegisteredDynamicLogging
 
 /**
  * Implement these methods to allow a file's log level to be managed from a central location.
@@ -718,18 +718,18 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
  * The implementation can be very straight-forward:
  *
  * ```
- * + (int)ddLogLevel
+ * + (int)tmpLogLevel
  * {
- *     return ddLogLevel;
+ *     return tmpLogLevel;
  * }
  *
- * + (void)ddSetLogLevel:(DDLogLevel)level
+ * + (void)tmpSetLogLevel:(TMPLogLevel)level
  * {
- *     ddLogLevel = level;
+ *     tmpLogLevel = level;
  * }
  * ```
  **/
-@property (class, nonatomic, readwrite, setter=ddSetLogLevel:) DDLogLevel ddLogLevel;
+@property (class, nonatomic, readwrite, setter=tmpSetLogLevel:) TMPLogLevel tmpLogLevel;
 
 @end
 
@@ -744,39 +744,39 @@ FOUNDATION_EXTERN NSString * __nullable DDExtractFileNameWithoutExtension(const 
 /**
  *  Log message options, allow copying certain log elements
  */
-typedef NS_OPTIONS(NSInteger, DDLogMessageOptions){
+typedef NS_OPTIONS(NSInteger, TMPLogMessageOptions){
     /**
      *  Use this to use a copy of the file path
      */
-    DDLogMessageCopyFile        = 1 << 0,
+    TMPLogMessageCopyFile        = 1 << 0,
     /**
      *  Use this to use a copy of the function name
      */
-    DDLogMessageCopyFunction    = 1 << 1,
+    TMPLogMessageCopyFunction    = 1 << 1,
     /**
      *  Use this to use avoid a copy of the message
      */
-    DDLogMessageDontCopyMessage = 1 << 2
+    TMPLogMessageDontCopyMessage = 1 << 2
 };
 
 /**
- * The `DDLogMessage` class encapsulates information about the log message.
+ * The `TMPLogMessage` class encapsulates information about the log message.
  * If you write custom loggers or formatters, you will be dealing with objects of this class.
  **/
-@interface DDLogMessage : NSObject <NSCopying>
+@interface TMPLogMessage : NSObject <NSCopying>
 {
     // Direct accessors to be used only for performance
     @public
     NSString *_message;
-    DDLogLevel _level;
-    DDLogFlag _flag;
+    TMPLogLevel _level;
+    TMPLogFlag _flag;
     NSInteger _context;
     NSString *_file;
     NSString *_fileName;
     NSString *_function;
     NSUInteger _line;
     id _tag;
-    DDLogMessageOptions _options;
+    TMPLogMessageOptions _options;
     NSDate *_timestamp;
     NSString *_threadID;
     NSString *_threadName;
@@ -810,20 +810,20 @@ typedef NS_OPTIONS(NSInteger, DDLogMessageOptions){
  *  @param function  the current function
  *  @param line      the current code line
  *  @param tag       potential tag
- *  @param options   a bitmask which supports DDLogMessageCopyFile and DDLogMessageCopyFunction.
+ *  @param options   a bitmask which supports TMPLogMessageCopyFile and TMPLogMessageCopyFunction.
  *  @param timestamp the log timestamp
  *
  *  @return a new instance of a log message model object
  */
 - (instancetype)initWithMessage:(NSString *)message
-                          level:(DDLogLevel)level
-                           flag:(DDLogFlag)flag
+                          level:(TMPLogLevel)level
+                           flag:(TMPLogFlag)flag
                         context:(NSInteger)context
                            file:(NSString *)file
                        function:(NSString * __nullable)function
                            line:(NSUInteger)line
                             tag:(id __nullable)tag
-                        options:(DDLogMessageOptions)options
+                        options:(TMPLogMessageOptions)options
                       timestamp:(NSDate * __nullable)timestamp NS_DESIGNATED_INITIALIZER;
 
 /**
@@ -834,15 +834,15 @@ typedef NS_OPTIONS(NSInteger, DDLogMessageOptions){
  *  The log message
  */
 @property (readonly, nonatomic) NSString *message;
-@property (readonly, nonatomic) DDLogLevel level;
-@property (readonly, nonatomic) DDLogFlag flag;
+@property (readonly, nonatomic) TMPLogLevel level;
+@property (readonly, nonatomic) TMPLogFlag flag;
 @property (readonly, nonatomic) NSInteger context;
 @property (readonly, nonatomic) NSString *file;
 @property (readonly, nonatomic) NSString *fileName;
 @property (readonly, nonatomic) NSString * __nullable function;
 @property (readonly, nonatomic) NSUInteger line;
 @property (readonly, nonatomic) id __nullable tag;
-@property (readonly, nonatomic) DDLogMessageOptions options;
+@property (readonly, nonatomic) TMPLogMessageOptions options;
 @property (readonly, nonatomic) NSDate *timestamp;
 @property (readonly, nonatomic) NSString *threadID; // ID as it appears in NSLog calculated from the machThreadID
 @property (readonly, nonatomic) NSString *threadName;
@@ -855,7 +855,7 @@ typedef NS_OPTIONS(NSInteger, DDLogMessageOptions){
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * The `DDLogger` protocol specifies that an optional formatter can be added to a logger.
+ * The `TMPLogger` protocol specifies that an optional formatter can be added to a logger.
  * Most (but not all) loggers will want to support formatters.
  *
  * However, writing getters and setters in a thread safe manner,
@@ -870,15 +870,15 @@ typedef NS_OPTIONS(NSInteger, DDLogMessageOptions){
  * Logger implementations may simply extend this class,
  * and they can ACCESS THE FORMATTER VARIABLE DIRECTLY from within their `logMessage:` method!
  **/
-@interface DDAbstractLogger : NSObject <DDLogger>
+@interface TMPAbstractLogger : NSObject <TMPLogger>
 {
     // Direct accessors to be used only for performance
     @public
-    id <DDLogFormatter> _logFormatter;
+    id <TMPLogFormatter> _logFormatter;
     dispatch_queue_t _loggerQueue;
 }
 
-@property (nonatomic, strong, nullable) id <DDLogFormatter> logFormatter;
+@property (nonatomic, strong, nullable) id <TMPLogFormatter> logFormatter;
 @property (nonatomic, DISPATCH_QUEUE_REFERENCE_TYPE) dispatch_queue_t loggerQueue;
 
 // For thread-safety assertions
@@ -899,13 +899,13 @@ typedef NS_OPTIONS(NSInteger, DDLogMessageOptions){
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface DDLoggerInformation : NSObject
+@interface TMPLoggerInformation : NSObject
 
-@property (nonatomic, readonly) id <DDLogger> logger;
-@property (nonatomic, readonly) DDLogLevel level;
+@property (nonatomic, readonly) id <TMPLogger> logger;
+@property (nonatomic, readonly) TMPLogLevel level;
 
-+ (DDLoggerInformation *)informationWithLogger:(id <DDLogger>)logger
-                           andLevel:(DDLogLevel)level;
++ (TMPLoggerInformation *)informationWithLogger:(id <TMPLogger>)logger
+                           andLevel:(TMPLogLevel)level;
 
 @end
 

@@ -13,14 +13,18 @@
 //   to endorse or promote products derived from this software without specific
 //   prior written permission of Deusty, LLC.
 
-#import <CocoaLumberjack/DDFileLogger.h>
+#import <CocoaLumberjack/CocoaLumberjack.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface DDFileLogger (Buffering)
+@interface TMPFileLogger (Internal)
 
-- (instancetype)wrapWithBuffer;
-- (instancetype)unwrapFromBuffer;
+- (void)logData:(NSData *)data;
+
+// Will assert if used outside logger's queue.
+- (void)lt_logData:(NSData *)data;
+
+- (NSData *)lt_dataForMessage:(TMPLogMessage *)message;
 
 @end
 

@@ -13,11 +13,11 @@
 //   to endorse or promote products derived from this software without specific
 //   prior written permission of Deusty, LLC.
 
-#import "DDASLLogCapture.h"
+#import "TMPASLLogCapture.h"
 
 // Disable legacy macros
-#ifndef DD_LEGACY_MACROS
-    #define DD_LEGACY_MACROS 0
+#ifndef TMP_LEGACY_MACROS
+    #define TMP_LEGACY_MACROS 0
 #endif
 
 #if !TARGET_OS_WATCH
@@ -28,9 +28,9 @@
 #include <sys/time.h>
 
 static BOOL _cancel = YES;
-static DDLogLevel _captureLevel = DDLogLevelVerbose;
+static TMPLogLevel _captureLevel = TMPLogLevelVerbose;
 
-@implementation DDASLLogCapture
+@implementation TMPASLLogCapture
 
 + (void)start {
     // Ignore subsequent calls
@@ -49,23 +49,23 @@ static DDLogLevel _captureLevel = DDLogLevelVerbose;
     _cancel = YES;
 }
 
-+ (DDLogLevel)captureLevel {
++ (TMPLogLevel)captureLevel {
     return _captureLevel;
 }
 
-+ (void)setCaptureLevel:(DDLogLevel)level {
++ (void)setCaptureLevel:(TMPLogLevel)level {
     _captureLevel = level;
 }
 
 #pragma mark - Private methods
 
 + (void)configureAslQuery:(aslmsg)query {
-    const char param[] = "7";  // ASL_LEVEL_DEBUG, which is everything. We'll rely on regular DDlog log level to filter
+    const char param[] = "7";  // ASL_LEVEL_DEBUG, which is everything. We'll rely on regular TMPlog log level to filter
     
     asl_set_query(query, ASL_KEY_LEVEL, param, ASL_QUERY_OP_LESS_EQUAL | ASL_QUERY_OP_NUMERIC);
 
-    // Don't retrieve logs from our own DDASLLogger
-    asl_set_query(query, kDDASLKeyDDLog, kDDASLDDLogValue, ASL_QUERY_OP_NOT_EQUAL);
+    // Don't retrieve logs from our own TMPASLLogger
+    asl_set_query(query, kTMPASLKeyTMPLog, kTMPASLTMPLogValue, ASL_QUERY_OP_NOT_EQUAL);
     
 #if !TARGET_OS_IPHONE || (defined(TARGET_SIMULATOR) && TARGET_SIMULATOR)
     int processId = [[NSProcessInfo processInfo] processIdentifier];
@@ -80,7 +80,7 @@ static DDLogLevel _captureLevel = DDLogLevelVerbose;
     if ( messageCString == NULL )
         return;
 
-    DDLogFlag flag;
+    TMPLogFlag flag;
     BOOL async;
 
     const char* levelCString = asl_get(msg, ASL_KEY_LEVEL);
@@ -88,13 +88,13 @@ static DDLogLevel _captureLevel = DDLogLevelVerbose;
         // By default all NSLog's with a ASL_LEVEL_WARNING level
         case ASL_LEVEL_EMERG    :
         case ASL_LEVEL_ALERT    :
-        case ASL_LEVEL_CRIT     : flag = DDLogFlagError;    async = NO;  break;
-        case ASL_LEVEL_ERR      : flag = DDLogFlagWarning;  async = YES; break;
-        case ASL_LEVEL_WARNING  : flag = DDLogFlagInfo;     async = YES; break;
-        case ASL_LEVEL_NOTICE   : flag = DDLogFlagDebug;    async = YES; break;
+        case ASL_LEVEL_CRIT     : flag = TMPLogFlagError;    async = NO;  break;
+        case ASL_LEVEL_ERR      : flag = TMPLogFlagWarning;  async = YES; break;
+        case ASL_LEVEL_WARNING  : flag = TMPLogFlagInfo;     async = YES; break;
+        case ASL_LEVEL_NOTICE   : flag = TMPLogFlagDebug;    async = YES; break;
         case ASL_LEVEL_INFO     :
         case ASL_LEVEL_DEBUG    :
-        default                 : flag = DDLogFlagVerbose;  async = YES;  break;
+        default                 : flag = TMPLogFlagVerbose;  async = YES;  break;
     }
 
     if (!(_captureLevel & flag)) {
@@ -112,18 +112,18 @@ static DDLogLevel _captureLevel = DDLogLevelVerbose;
 
     NSDate *timeStamp = [NSDate dateWithTimeIntervalSince1970:totalSeconds];
 
-    DDLogMessage *logMessage = [[DDLogMessage alloc]initWithMessage:message
+    TMPLogMessage *logMessage = [[TMPLogMessage alloc]initWithMessage:message
                                                               level:_captureLevel
                                                                flag:flag
                                                             context:0
-                                                               file:@"DDASLLogCapture"
+                                                               file:@"TMPASLLogCapture"
                                                            function:nil
                                                                line:0
                                                                 tag:nil
                                                             options:0
                                                           timestamp:timeStamp];
     
-    [DDLog log:async message:logMessage];
+    [TMPLog log:async message:logMessage];
 }
 
 + (void)captureAslLogs {

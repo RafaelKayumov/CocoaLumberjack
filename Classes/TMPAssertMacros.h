@@ -16,11 +16,11 @@
 /**
  * NSAssert replacement that will output a log message even when assertions are disabled.
  **/
-#define DDAssert(condition, frmt, ...)                                                \
+#define TMPAssert(condition, frmt, ...)                                                \
         if (!(condition)) {                                                           \
             NSString *description = [NSString stringWithFormat:frmt, ## __VA_ARGS__]; \
-            DDLogError(@"%@", description);                                           \
+            TMPLogError(@"%@", description);                                           \
             NSAssert(NO, @"%@", description);                                         \
         }
-#define DDAssertCondition(condition) DDAssert(condition, @"Condition not satisfied: %s", #condition)
+#define TMPAssertCondition(condition) TMPAssert(condition, @"Condition not satisfied: %s", #condition)
 

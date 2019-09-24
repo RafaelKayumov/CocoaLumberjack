@@ -20,13 +20,13 @@
  * - Parameters:
  *   - condition: The condition to test. Unlike `Swift.assert`, `condition` is always evaluated,
  *     even when assertions are disabled.
- *   - message: A string to log (using `DDLogError`) if `condition` evaluates to `false`.
+ *   - message: A string to log (using `TMPLogError`) if `condition` evaluates to `false`.
  *     The default is an empty string.
  */
 @inlinable
-public func DDAssert(_ condition: @autoclosure () -> Bool, _ message: @autoclosure () -> String = "", level: DDLogLevel = DDDefaultLogLevel, context: Int = 0, file: StaticString = #file, function: StaticString = #function, line: UInt = #line, tag: Any? = nil, asynchronous async: Bool = false, ddlog: DDLog = DDLog.sharedInstance) {
+public func TMPAssert(_ condition: @autoclosure () -> Bool, _ message: @autoclosure () -> String = "", level: TMPLogLevel = TMPDefaultLogLevel, context: Int = 0, file: StaticString = #file, function: StaticString = #function, line: UInt = #line, tag: Any? = nil, asynchronous async: Bool = false, tmplog: TMPLog = TMPLog.sharedInstance) {
     if !condition() {
-        DDLogError(message(), level: level, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, ddlog: ddlog)
+        TMPLogError(message(), level: level, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, tmplog: tmplog)
         Swift.assertionFailure(message(), file: file, line: line)
     }
 }
@@ -36,10 +36,10 @@ public func DDAssert(_ condition: @autoclosure () -> Bool, _ message: @autoclosu
  * when assertions are disabled.
  *
  * - Parameters:
- *   - message: A string to log (using `DDLogError`). The default is an empty string.
+ *   - message: A string to log (using `TMPLogError`). The default is an empty string.
  */
 @inlinable
-public func DDAssertionFailure(_ message: @autoclosure () -> String = "", level: DDLogLevel = DDDefaultLogLevel, context: Int = 0, file: StaticString = #file, function: StaticString = #function, line: UInt = #line, tag: Any? = nil, asynchronous async: Bool = false, ddlog: DDLog = DDLog.sharedInstance) {
-    DDLogError(message(), level: level, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, ddlog: ddlog)
+public func TMPAssertionFailure(_ message: @autoclosure () -> String = "", level: TMPLogLevel = TMPDefaultLogLevel, context: Int = 0, file: StaticString = #file, function: StaticString = #function, line: UInt = #line, tag: Any? = nil, asynchronous async: Bool = false, tmplog: TMPLog = TMPLog.sharedInstance) {
+    TMPLogError(message(), level: level, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, tmplog: tmplog)
     Swift.assertionFailure(message(), file: file, line: line)
 }

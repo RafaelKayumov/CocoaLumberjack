@@ -13,24 +13,24 @@
 //   to endorse or promote products derived from this software without specific
 //   prior written permission of Deusty, LLC.
 
-#import "DDMultiFormatter.h"
+#import "TMPMultiFormatter.h"
 
 #if !__has_feature(objc_arc)
 #error This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
 
-@interface DDMultiFormatter () {
+@interface TMPMultiFormatter () {
     dispatch_queue_t _queue;
     NSMutableArray *_formatters;
 }
 
-- (DDLogMessage *)logMessageForLine:(NSString *)line originalMessage:(DDLogMessage *)message;
+- (TMPLogMessage *)logMessageForLine:(NSString *)line originalMessage:(TMPLogMessage *)message;
 
 @end
 
 
-@implementation DDMultiFormatter
+@implementation TMPMultiFormatter
 
 - (instancetype)init {
     self = [super init];
@@ -45,12 +45,12 @@
 
 #pragma mark Processing
 
-- (NSString *)formatLogMessage:(DDLogMessage *)logMessage {
+- (NSString *)formatLogMessage:(TMPLogMessage *)logMessage {
     __block NSString *line = logMessage->_message;
 
     dispatch_sync(_queue, ^{
-        for (id<DDLogFormatter> formatter in self->_formatters) {
-            DDLogMessage *message = [self logMessageForLine:line originalMessage:logMessage];
+        for (id<TMPLogFormatter> formatter in self->_formatters) {
+            TMPLogMessage *message = [self logMessageForLine:line originalMessage:logMessage];
             line = [formatter formatLogMessage:message];
 
             if (!line) {
@@ -62,8 +62,8 @@
     return line;
 }
 
-- (DDLogMessage *)logMessageForLine:(NSString *)line originalMessage:(DDLogMessage *)message {
-    DDLogMessage *newMessage = [message copy];
+- (TMPLogMessage *)logMessageForLine:(NSString *)line originalMessage:(TMPLogMessage *)message {
+    TMPLogMessage *newMessage = [message copy];
 
     newMessage->_message = line;
     return newMessage;
@@ -81,13 +81,13 @@
     return formatters;
 }
 
-- (void)addFormatter:(id<DDLogFormatter>)formatter {
+- (void)addFormatter:(id<TMPLogFormatter>)formatter {
     dispatch_barrier_async(_queue, ^{
         [self->_formatters addObject:formatter];
     });
 }
 
-- (void)removeFormatter:(id<DDLogFormatter>)formatter {
+- (void)removeFormatter:(id<TMPLogFormatter>)formatter {
     dispatch_barrier_async(_queue, ^{
         [self->_formatters removeObject:formatter];
     });
@@ -99,7 +99,7 @@
     });
 }
 
-- (BOOL)isFormattingWithFormatter:(id<DDLogFormatter>)formatter {
+- (BOOL)isFormattingWithFormatter:(id<TMPLogFormatter>)formatter {
     __block BOOL hasFormatter;
 
     dispatch_sync(_queue, ^{

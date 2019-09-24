@@ -13,19 +13,30 @@
 //   to endorse or promote products derived from this software without specific
 //   prior written permission of Deusty, LLC.
 
-#import <CocoaLumberjack/CocoaLumberjack.h>
+#import <CocoaLumberjack/TMPASLLogger.h>
 
-NS_ASSUME_NONNULL_BEGIN
+@protocol TMPLogger;
 
-@interface DDFileLogger (Internal)
+/**
+ *  This class provides the ability to capture the ASL (Apple System Logs)
+ */
+API_DEPRECATED("Use TMPOSLogger instead", macosx(10.4,10.12), ios(2.0,10.0), watchos(2.0,3.0), tvos(9.0,10.0))
+@interface TMPASLLogCapture : NSObject
 
-- (void)logData:(NSData *)data;
+/**
+ *  Start capturing logs
+ */
++ (void)start;
 
-// Will assert if used outside logger's queue.
-- (void)lt_logData:(NSData *)data;
+/**
+ *  Stop capturing logs
+ */
++ (void)stop;
 
-- (NSData *)lt_dataForMessage:(DDLogMessage *)message;
+/**
+ *  The current capture level.
+ *  @note Default log level: TMPLogLevelVerbose (i.e. capture all ASL messages).
+ */
+@property (class) TMPLogLevel captureLevel;
 
 @end
-
-NS_ASSUME_NONNULL_END

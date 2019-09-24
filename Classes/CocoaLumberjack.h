@@ -34,11 +34,11 @@
  * Define your logging level in your implementation file:
  *
  * // Log levels: off, error, warn, info, verbose
- * static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
+ * static const TMPLogLevel tmpLogLevel = TMPLogLevelVerbose;
  *
  * Step 2 [3rd party frameworks]:
  *
- * Define your LOG_LEVEL_DEF to a different variable/function than ddLogLevel:
+ * Define your LOG_LEVEL_DEF to a different variable/function than tmpLogLevel:
  *
  * // #undef LOG_LEVEL_DEF // Undefine first only if needed
  * #define LOG_LEVEL_DEF myLibLogLevel
@@ -46,14 +46,14 @@
  * Define your logging level in your implementation file:
  *
  * // Log levels: off, error, warn, info, verbose
- * static const DDLogLevel myLibLogLevel = DDLogLevelVerbose;
+ * static const TMPLogLevel myLibLogLevel = TMPLogLevelVerbose;
  *
  * Step 3:
- * Replace your NSLog statements with DDLog statements according to the severity of the message.
+ * Replace your NSLog statements with TMPLog statements according to the severity of the message.
  *
- * NSLog(@"Fatal error, no dohickey found!"); -> DDLogError(@"Fatal error, no dohickey found!");
+ * NSLog(@"Fatal error, no dohickey found!"); -> TMPLogError(@"Fatal error, no dohickey found!");
  *
- * DDLog works exactly the same as NSLog.
+ * TMPLog works exactly the same as NSLog.
  * This means you can pass it multiple variables just like NSLog.
  **/
 
@@ -66,38 +66,38 @@ FOUNDATION_EXPORT double CocoaLumberjackVersionNumber;
 FOUNDATION_EXPORT const unsigned char CocoaLumberjackVersionString[];
 
 // Disable legacy macros
-#ifndef DD_LEGACY_MACROS
-    #define DD_LEGACY_MACROS 0
+#ifndef TMP_LEGACY_MACROS
+    #define TMP_LEGACY_MACROS 0
 #endif
 
 // Core
-#import <CocoaLumberjack/DDLog.h>
+#import <CocoaLumberjack/TMPLog.h>
 
 // Main macros
-#import <CocoaLumberjack/DDLogMacros.h>
-#import <CocoaLumberjack/DDAssertMacros.h>
+#import <CocoaLumberjack/TMPLogMacros.h>
+#import <CocoaLumberjack/TMPAssertMacros.h>
 
 // Capture ASL
-#import <CocoaLumberjack/DDASLLogCapture.h>
+#import <CocoaLumberjack/TMPASLLogCapture.h>
 
 // Loggers
-#import <CocoaLumberjack/DDLoggerNames.h>
+#import <CocoaLumberjack/TMPLoggerNames.h>
 
-#import <CocoaLumberjack/DDTTYLogger.h>
-#import <CocoaLumberjack/DDASLLogger.h>
-#import <CocoaLumberjack/DDFileLogger.h>
-#import <CocoaLumberjack/DDOSLogger.h>
+#import <CocoaLumberjack/TMPTTYLogger.h>
+#import <CocoaLumberjack/TMPASLLogger.h>
+#import <CocoaLumberjack/TMPFileLogger.h>
+#import <CocoaLumberjack/TMPOSLogger.h>
 
 // Extensions
-#import <CocoaLumberjack/DDContextFilterLogFormatter.h>
-#import <CocoaLumberjack/DDDispatchQueueLogFormatter.h>
-#import <CocoaLumberjack/DDMultiFormatter.h>
-#import <CocoaLumberjack/DDFileLogger+Buffering.h>
+#import <CocoaLumberjack/TMPContextFilterLogFormatter.h>
+#import <CocoaLumberjack/TMPDispatchQueueLogFormatter.h>
+#import <CocoaLumberjack/TMPMultiFormatter.h>
+#import <CocoaLumberjack/TMPFileLogger+Buffering.h>
 
 // CLI
 #import <CocoaLumberjack/CLIColor.h>
 
 // etc
-#import <CocoaLumberjack/DDAbstractDatabaseLogger.h>
-#import <CocoaLumberjack/DDLog+LOGV.h>
-#import <CocoaLumberjack/DDLegacyMacros.h>
+#import <CocoaLumberjack/TMPAbstractDatabaseLogger.h>
+#import <CocoaLumberjack/TMPLog+LOGV.h>
+#import <CocoaLumberjack/TMPLegacyMacros.h>

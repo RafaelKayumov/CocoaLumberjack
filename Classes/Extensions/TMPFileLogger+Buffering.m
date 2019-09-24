@@ -13,18 +13,18 @@
 //   to endorse or promote products derived from this software without specific
 //   prior written permission of Deusty, LLC.
 
-#import <CocoaLumberjack/DDFileLogger+Internal.h>
-#import <CocoaLumberjack/DDFileLogger+Buffering.h>
+#import <CocoaLumberjack/TMPFileLogger+Internal.h>
+#import <CocoaLumberjack/TMPFileLogger+Buffering.h>
 
 #import <sys/mount.h>
 
-static const NSUInteger kDDDefaultBufferSize = 4096; // 4 kB, block f_bsize on iphone7
-static const NSUInteger kDDMaxBufferSize = 1048576; // ~1 mB, f_iosize on iphone7
+static const NSUInteger kTMPDefaultBufferSize = 4096; // 4 kB, block f_bsize on iphone7
+static const NSUInteger kTMPMaxBufferSize = 1048576; // ~1 mB, f_iosize on iphone7
 
 // Reads attributes from base file system to determine buffer size.
 // see statfs in sys/mount.h for descriptions of f_iosize and f_bsize.
 // f_bsize == "default", and f_iosize == "max"
-static inline NSUInteger p_DDGetDefaultBufferSizeBytesMax(const BOOL max) {
+static inline NSUInteger p_TMPGetDefaultBufferSizeBytesMax(const BOOL max) {
     struct statfs *mountedFileSystems = NULL;
     int count = getmntinfo(&mountedFileSystems, 0);
 
@@ -38,30 +38,30 @@ static inline NSUInteger p_DDGetDefaultBufferSizeBytesMax(const BOOL max) {
         }
     }
 
-    return max ? kDDMaxBufferSize : kDDDefaultBufferSize;
+    return max ? kTMPMaxBufferSize : kTMPDefaultBufferSize;
 }
 
-static NSUInteger DDGetMaxBufferSizeBytes() {
+static NSUInteger TMPGetMaxBufferSizeBytes() {
     static NSUInteger maxBufferSize = 0;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        maxBufferSize = p_DDGetDefaultBufferSizeBytesMax(YES);
+        maxBufferSize = p_TMPGetDefaultBufferSizeBytesMax(YES);
     });
     return maxBufferSize;
 }
 
-static NSUInteger DDGetDefaultBufferSizeBytes() {
+static NSUInteger TMPGetDefaultBufferSizeBytes() {
     static NSUInteger defaultBufferSize = 0;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        defaultBufferSize = p_DDGetDefaultBufferSizeBytesMax(NO);
+        defaultBufferSize = p_TMPGetDefaultBufferSizeBytesMax(NO);
     });
     return defaultBufferSize;
 }
 
-@interface DDBufferedProxy : NSProxy
+@interface TMPBufferedProxy : NSProxy
 
-@property (nonatomic) DDFileLogger *fileLogger;
+@property (nonatomic) TMPFileLogger *fileLogger;
 @property (nonatomic) NSOutputStream *buffer;
 
 @property (nonatomic) NSUInteger maxBufferSizeBytes;
@@ -69,11 +69,11 @@ static NSUInteger DDGetDefaultBufferSizeBytes() {
 
 @end
 
-@implementation DDBufferedProxy
+@implementation TMPBufferedProxy
 
-- (instancetype)initWithFileLogger:(DDFileLogger *)fileLogger {
+- (instancetype)initWithFileLogger:(TMPFileLogger *)fileLogger {
     _fileLogger = fileLogger;
-    _maxBufferSizeBytes = DDGetDefaultBufferSizeBytes();
+    _maxBufferSizeBytes = TMPGetDefaultBufferSizeBytes();
     [self flushBuffer];
 
     return self;
@@ -109,7 +109,7 @@ static NSUInteger DDGetDefaultBufferSizeBytes() {
 
 #pragma mark - Logging
 
-- (void)logMessage:(DDLogMessage *)logMessage {
+- (void)logMessage:(TMPLogMessage *)logMessage {
     NSData *data = [_fileLogger lt_dataForMessage:logMessage];
     NSUInteger length = data.length;
     if (length == 0) {
@@ -140,13 +140,13 @@ static NSUInteger DDGetDefaultBufferSizeBytes() {
         }
     };
 
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self.fileLogger isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self.fileLogger isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_sync(globalLoggingQueue, ^{
@@ -158,17 +158,17 @@ static NSUInteger DDGetDefaultBufferSizeBytes() {
 #pragma mark - Properties
 
 - (void)setMaxBufferSizeBytes:(NSUInteger)newBufferSizeBytes {
-    _maxBufferSizeBytes = MIN(newBufferSizeBytes, DDGetMaxBufferSizeBytes());
+    _maxBufferSizeBytes = MIN(newBufferSizeBytes, TMPGetMaxBufferSizeBytes());
 }
 
 #pragma mark - Wrapping
 
-- (DDFileLogger *)wrapWithBuffer {
-    return (DDFileLogger *)self;
+- (TMPFileLogger *)wrapWithBuffer {
+    return (TMPFileLogger *)self;
 }
 
-- (DDFileLogger *)unwrapFromBuffer {
-    return (DDFileLogger *)self.fileLogger;
+- (TMPFileLogger *)unwrapFromBuffer {
+    return (TMPFileLogger *)self.fileLogger;
 }
 
 #pragma mark - NSProxy
@@ -187,10 +187,10 @@ static NSUInteger DDGetDefaultBufferSizeBytes() {
 
 @end
 
-@implementation DDFileLogger (Buffering)
+@implementation TMPFileLogger (Buffering)
 
 - (instancetype)wrapWithBuffer {
-    return (DDFileLogger *)[[DDBufferedProxy alloc] initWithFileLogger:self];
+    return (TMPFileLogger *)[[TMPBufferedProxy alloc] initWithFileLogger:self];
 }
 
 - (instancetype)unwrapFromBuffer {

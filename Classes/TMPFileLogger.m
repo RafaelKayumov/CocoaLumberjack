@@ -13,9 +13,9 @@
 //   to endorse or promote products derived from this software without specific
 //   prior written permission of Deusty, LLC.
 
-#import "DDFileLogger.h"
+#import "TMPFileLogger.h"
 
-#import "DDFileLogger+Internal.h"
+#import "TMPFileLogger+Internal.h"
 
 #import <sys/xattr.h>
 
@@ -23,38 +23,38 @@
 #error This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-// We probably shouldn't be using DDLog() statements within the DDLog implementation.
+// We probably shouldn't be using TMPLog() statements within the TMPLog implementation.
 // But we still want to leave our log statements for any future debugging,
 // and to allow other developers to trace the implementation (which is a great learning tool).
 //
 // So we use primitive logging macros around NSLog.
 // We maintain the NS prefix on the macros to be explicit about the fact that we're using NSLog.
 
-#ifndef DD_NSLOG_LEVEL
-    #define DD_NSLOG_LEVEL 2
+#ifndef TMP_NSLOG_LEVEL
+    #define TMP_NSLOG_LEVEL 2
 #endif
 
-#define NSLogError(frmt, ...)    do{ if(DD_NSLOG_LEVEL >= 1) NSLog((frmt), ##__VA_ARGS__); } while(0)
-#define NSLogWarn(frmt, ...)     do{ if(DD_NSLOG_LEVEL >= 2) NSLog((frmt), ##__VA_ARGS__); } while(0)
-#define NSLogInfo(frmt, ...)     do{ if(DD_NSLOG_LEVEL >= 3) NSLog((frmt), ##__VA_ARGS__); } while(0)
-#define NSLogDebug(frmt, ...)    do{ if(DD_NSLOG_LEVEL >= 4) NSLog((frmt), ##__VA_ARGS__); } while(0)
-#define NSLogVerbose(frmt, ...)  do{ if(DD_NSLOG_LEVEL >= 5) NSLog((frmt), ##__VA_ARGS__); } while(0)
+#define NSLogError(frmt, ...)    do{ if(TMP_NSLOG_LEVEL >= 1) NSLog((frmt), ##__VA_ARGS__); } while(0)
+#define NSLogWarn(frmt, ...)     do{ if(TMP_NSLOG_LEVEL >= 2) NSLog((frmt), ##__VA_ARGS__); } while(0)
+#define NSLogInfo(frmt, ...)     do{ if(TMP_NSLOG_LEVEL >= 3) NSLog((frmt), ##__VA_ARGS__); } while(0)
+#define NSLogDebug(frmt, ...)    do{ if(TMP_NSLOG_LEVEL >= 4) NSLog((frmt), ##__VA_ARGS__); } while(0)
+#define NSLogVerbose(frmt, ...)  do{ if(TMP_NSLOG_LEVEL >= 5) NSLog((frmt), ##__VA_ARGS__); } while(0)
 
 
 #if TARGET_OS_IPHONE
 BOOL doesAppRunInBackground(void);
 #endif
 
-unsigned long long const kDDDefaultLogMaxFileSize      = 1024 * 1024;      // 1 MB
-NSTimeInterval     const kDDDefaultLogRollingFrequency = 60 * 60 * 24;     // 24 Hours
-NSUInteger         const kDDDefaultLogMaxNumLogFiles   = 5;                // 5 Files
-unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20 MB
+unsigned long long const kTMPDefaultLogMaxFileSize      = 1024 * 1024;      // 1 MB
+NSTimeInterval     const kTMPDefaultLogRollingFrequency = 60 * 60 * 24;     // 24 Hours
+NSUInteger         const kTMPDefaultLogMaxNumLogFiles   = 5;                // 5 Files
+unsigned long long const kTMPDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20 MB
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface DDLogFileManagerDefault () {
+@interface TMPLogFileManagerDefault () {
     NSUInteger _maximumNumberOfLogFiles;
     unsigned long long _logFilesDiskQuota;
     NSString *_logsDirectory;
@@ -65,7 +65,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 
 @end
 
-@implementation DDLogFileManagerDefault
+@implementation TMPLogFileManagerDefault
 
 @synthesize maximumNumberOfLogFiles = _maximumNumberOfLogFiles;
 @synthesize logFilesDiskQuota = _logFilesDiskQuota;
@@ -76,8 +76,8 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 
 - (instancetype)initWithLogsDirectory:(NSString * __nullable)aLogsDirectory {
     if ((self = [super init])) {
-        _maximumNumberOfLogFiles = kDDDefaultLogMaxNumLogFiles;
-        _logFilesDiskQuota = kDDDefaultLogFilesDiskQuota;
+        _maximumNumberOfLogFiles = kTMPDefaultLogMaxNumLogFiles;
+        _logFilesDiskQuota = kTMPDefaultLogFilesDiskQuota;
 
         if (aLogsDirectory.length > 0) {
             _logsDirectory = [aLogsDirectory copy];
@@ -90,8 +90,8 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
         [self addObserver:self forKeyPath:NSStringFromSelector(@selector(maximumNumberOfLogFiles)) options:kvoOptions context:nil];
         [self addObserver:self forKeyPath:NSStringFromSelector(@selector(logFilesDiskQuota)) options:kvoOptions context:nil];
 
-        NSLogVerbose(@"DDFileLogManagerDefault: logsDirectory:\n%@", [self logsDirectory]);
-        NSLogVerbose(@"DDFileLogManagerDefault: sortedLogFileNames:\n%@", [self sortedLogFileNames]);
+        NSLogVerbose(@"TMPFileLogManagerDefault: logsDirectory:\n%@", [self logsDirectory]);
+        NSLogVerbose(@"TMPFileLogManagerDefault: sortedLogFileNames:\n%@", [self sortedLogFileNames]);
     }
 
     return self;
@@ -150,7 +150,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 
     if ([keyPath isEqualToString:NSStringFromSelector(@selector(maximumNumberOfLogFiles))] ||
         [keyPath isEqualToString:NSStringFromSelector(@selector(logFilesDiskQuota))]) {
-        NSLogInfo(@"DDFileLogManagerDefault: Responding to configuration change: %@", keyPath);
+        NSLogInfo(@"TMPFileLogManagerDefault: Responding to configuration change: %@", keyPath);
 
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             @autoreleasepool {
@@ -184,7 +184,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
  * background queue.
  **/
 - (void)deleteOldLogFiles {
-    NSLogVerbose(@"DDLogFileManagerDefault: deleteOldLogFiles");
+    NSLogVerbose(@"TMPLogFileManagerDefault: deleteOldLogFiles");
 
     NSArray *sortedLogFileInfos = [self sortedLogFileInfos];
     NSUInteger firstIndexToDelete = NSNotFound;
@@ -196,7 +196,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
         unsigned long long used = 0;
 
         for (NSUInteger i = 0; i < sortedLogFileInfos.count; i++) {
-            DDLogFileInfo *info = sortedLogFileInfos[i];
+            TMPLogFileInfo *info = sortedLogFileInfos[i];
             used += info.fileSize;
 
             if (used > diskQuota) {
@@ -221,7 +221,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
         // So in most cases, we do not want to consider this file for deletion.
 
         if (sortedLogFileInfos.count > 0) {
-            DDLogFileInfo *logFileInfo = sortedLogFileInfos[0];
+            TMPLogFileInfo *logFileInfo = sortedLogFileInfos[0];
 
             if (!logFileInfo.isArchived) {
                 // Don't delete active file.
@@ -234,14 +234,14 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
         // removing all log files starting with firstIndexToDelete
 
         for (NSUInteger i = firstIndexToDelete; i < sortedLogFileInfos.count; i++) {
-            DDLogFileInfo *logFileInfo = sortedLogFileInfos[i];
+            TMPLogFileInfo *logFileInfo = sortedLogFileInfos[i];
 
             NSError *error = nil;
             BOOL success = [[NSFileManager defaultManager] removeItemAtPath:logFileInfo.filePath error:&error];
             if (success) {
-                NSLogInfo(@"DDLogFileManagerDefault: Deleting file: %@", logFileInfo.fileName);
+                NSLogInfo(@"TMPLogFileManagerDefault: Deleting file: %@", logFileInfo.fileName);
             } else {
-                NSLogError(@"DDLogFileManagerDefault: Error deleting file %@", error);
+                NSLogError(@"TMPLogFileManagerDefault: Error deleting file %@", error);
             }
         }
     }
@@ -283,7 +283,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
                                                               attributes:nil
                                                                    error:&err];
     if (success == NO) {
-        NSLogError(@"DDFileLogManagerDefault: Error creating logsDirectory: %@", err);
+        NSLogError(@"TMPFileLogManagerDefault: Error creating logsDirectory: %@", err);
     }
 
     return _logsDirectory;
@@ -367,7 +367,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
     NSMutableArray *unsortedLogFileInfos = [NSMutableArray arrayWithCapacity:[unsortedLogFilePaths count]];
 
     for (NSString *filePath in unsortedLogFilePaths) {
-        DDLogFileInfo *logFileInfo = [[DDLogFileInfo alloc] initWithFilePath:filePath];
+        TMPLogFileInfo *logFileInfo = [[TMPLogFileInfo alloc] initWithFilePath:filePath];
 
         [unsortedLogFileInfos addObject:logFileInfo];
     }
@@ -380,7 +380,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 
     NSMutableArray *sortedLogFilePaths = [NSMutableArray arrayWithCapacity:[sortedLogFileInfos count]];
 
-    for (DDLogFileInfo *logFileInfo in sortedLogFileInfos) {
+    for (TMPLogFileInfo *logFileInfo in sortedLogFileInfos) {
         [sortedLogFilePaths addObject:[logFileInfo filePath]];
     }
 
@@ -392,7 +392,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 
     NSMutableArray *sortedLogFileNames = [NSMutableArray arrayWithCapacity:[sortedLogFileInfos count]];
 
-    for (DDLogFileInfo *logFileInfo in sortedLogFileInfos) {
+    for (TMPLogFileInfo *logFileInfo in sortedLogFileInfos) {
         [sortedLogFileNames addObject:[logFileInfo fileName]];
     }
 
@@ -400,8 +400,8 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 }
 
 - (NSArray *)sortedLogFileInfos {
-    return [[self unsortedLogFileInfos] sortedArrayUsingComparator:^NSComparisonResult(DDLogFileInfo *obj1,
-                                                                                       DDLogFileInfo *obj2) {
+    return [[self unsortedLogFileInfos] sortedArrayUsingComparator:^NSComparisonResult(TMPLogFileInfo *obj1,
+                                                                                       TMPLogFileInfo *obj2) {
         NSDate *date1 = [NSDate new];
         NSDate *date2 = [NSDate new];
 
@@ -473,7 +473,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 
     do {
         if (criticalErrors >= MAX_ALLOWED_ERROR) {
-            NSLogError(@"DDLogFileManagerDefault: Bailing file creation, encountered %ld errors.",
+            NSLogError(@"TMPLogFileManagerDefault: Bailing file creation, encountered %ld errors.",
                         (unsigned long)criticalErrors);
             return nil;
         }
@@ -559,13 +559,13 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface DDLogFileFormatterDefault () {
+@interface TMPLogFileFormatterDefault () {
     NSDateFormatter *_dateFormatter;
 }
 
 @end
 
-@implementation DDLogFileFormatterDefault
+@implementation TMPLogFileFormatterDefault
 
 - (instancetype)init {
     return [self initWithDateFormatter:nil];
@@ -585,7 +585,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
     return self;
 }
 
-- (NSString *)formatLogMessage:(DDLogMessage *)logMessage {
+- (NSString *)formatLogMessage:(TMPLogMessage *)logMessage {
     NSString *dateAndTime = [_dateFormatter stringFromDate:(logMessage->_timestamp)];
 
     return [NSString stringWithFormat:@"%@  %@", dateAndTime, logMessage->_message];
@@ -597,10 +597,10 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface DDFileLogger () {
-    id <DDLogFileManager> _logFileManager;
+@interface TMPFileLogger () {
+    id <TMPLogFileManager> _logFileManager;
 
-    DDLogFileInfo *_currentLogFileInfo;
+    TMPLogFileInfo *_currentLogFileInfo;
     NSFileHandle *_currentLogFileHandle;
 
     dispatch_source_t _currentLogFileVnode;
@@ -617,29 +617,29 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
-@implementation DDFileLogger
+@implementation TMPFileLogger
 #pragma clang diagnostic pop
 
 - (instancetype)init {
-    DDLogFileManagerDefault *defaultLogFileManager = [[DDLogFileManagerDefault alloc] init];
+    TMPLogFileManagerDefault *defaultLogFileManager = [[TMPLogFileManagerDefault alloc] init];
     return [self initWithLogFileManager:defaultLogFileManager completionQueue:nil];
 }
 
-- (instancetype)initWithLogFileManager:(id<DDLogFileManager>)logFileManager {
+- (instancetype)initWithLogFileManager:(id<TMPLogFileManager>)logFileManager {
     return [self initWithLogFileManager:logFileManager completionQueue:nil];
 }
 
-- (instancetype)initWithLogFileManager:(id <DDLogFileManager>)aLogFileManager
+- (instancetype)initWithLogFileManager:(id <TMPLogFileManager>)aLogFileManager
                        completionQueue:(dispatch_queue_t __nullable)dispatchQueue {
     if ((self = [super init])) {
         _completionQueue = dispatchQueue ?: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 
-        _maximumFileSize = kDDDefaultLogMaxFileSize;
-        _rollingFrequency = kDDDefaultLogRollingFrequency;
+        _maximumFileSize = kTMPDefaultLogMaxFileSize;
+        _rollingFrequency = kTMPDefaultLogRollingFrequency;
         _automaticallyAppendNewlineForCustomFormatters = YES;
 
         _logFileManager = aLogFileManager;
-        _logFormatter = [DDLogFileFormatterDefault new];
+        _logFormatter = [TMPLogFileFormatterDefault new];
     }
 
     return self;
@@ -683,8 +683,8 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
         result = self->_maximumFileSize;
     };
 
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     // Note: The internal implementation MUST access the maximumFileSize variable directly,
     // This method is designed explicitly for external access.
@@ -696,7 +696,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
     NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
     NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 
-    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
 
     dispatch_sync(globalLoggingQueue, ^{
         dispatch_sync(self.loggerQueue, block);
@@ -713,8 +713,8 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
         }
     };
 
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     // Note: The internal implementation MUST access the maximumFileSize variable directly,
     // This method is designed explicitly for external access.
@@ -726,7 +726,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
     NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
     NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 
-    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
 
     dispatch_async(globalLoggingQueue, ^{
         dispatch_async(self.loggerQueue, block);
@@ -740,8 +740,8 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
         result = self->_rollingFrequency;
     };
 
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     // Note: The internal implementation should access the rollingFrequency variable directly,
     // This method is designed explicitly for external access.
@@ -753,7 +753,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
     NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
     NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 
-    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
 
     dispatch_sync(globalLoggingQueue, ^{
         dispatch_sync(self.loggerQueue, block);
@@ -770,8 +770,8 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
         }
     };
 
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     // Note: The internal implementation should access the rollingFrequency variable directly,
     // This method is designed explicitly for external access.
@@ -783,7 +783,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
     NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
     NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 
-    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
 
     dispatch_async(globalLoggingQueue, ^{
         dispatch_async(self.loggerQueue, block);
@@ -810,10 +810,10 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
     NSTimeInterval frequency = MIN(_rollingFrequency, DBL_MAX - [logFileCreationDate timeIntervalSinceReferenceDate]);
     NSDate *logFileRollingDate = [logFileCreationDate dateByAddingTimeInterval:frequency];
 
-    NSLogVerbose(@"DDFileLogger: scheduleTimerToRollLogFileDueToAge");
-    NSLogVerbose(@"DDFileLogger: logFileCreationDate    : %@", logFileCreationDate);
-    NSLogVerbose(@"DDFileLogger: actual rollingFrequency: %f", frequency);
-    NSLogVerbose(@"DDFileLogger: logFileRollingDate     : %@", logFileRollingDate);
+    NSLogVerbose(@"TMPFileLogger: scheduleTimerToRollLogFileDueToAge");
+    NSLogVerbose(@"TMPFileLogger: logFileCreationDate    : %@", logFileCreationDate);
+    NSLogVerbose(@"TMPFileLogger: actual rollingFrequency: %f", frequency);
+    NSLogVerbose(@"TMPFileLogger: logFileRollingDate     : %@", logFileRollingDate);
 
     _rollingTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, _loggerQueue);
 
@@ -829,8 +829,8 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
     });
     #endif
 
-    static NSTimeInterval const kDDMaxTimerDelay = LLONG_MAX / NSEC_PER_SEC;
-    int64_t delay = (int64_t)(MIN([logFileRollingDate timeIntervalSinceNow], kDDMaxTimerDelay) * (NSTimeInterval) NSEC_PER_SEC);
+    static NSTimeInterval const kTMPMaxTimerDelay = LLONG_MAX / NSEC_PER_SEC;
+    int64_t delay = (int64_t)(MIN([logFileRollingDate timeIntervalSinceNow], kTMPMaxTimerDelay) * (NSTimeInterval) NSEC_PER_SEC);
     dispatch_time_t fireTime = dispatch_time(DISPATCH_TIME_NOW, delay);
 
     dispatch_source_set_timer(_rollingTimer, fireTime, DISPATCH_TIME_FOREVER, 1ull * NSEC_PER_SEC);
@@ -857,13 +857,13 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
         }
     };
 
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -874,7 +874,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 
 - (void)lt_rollLogFileNow {
     NSAssert([self isOnInternalLoggerQueue], @"lt_ methods should be on logger queue.");
-    NSLogVerbose(@"DDFileLogger: rollLogFileNow");
+    NSLogVerbose(@"TMPFileLogger: rollLogFileNow");
 
     if (_currentLogFileHandle == nil) {
         return;
@@ -909,7 +909,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
     NSAssert([self isOnInternalLoggerQueue], @"lt_ methods should be on logger queue.");
 
     if (_rollingFrequency > 0.0 && _currentLogFileInfo.age >= _rollingFrequency) {
-        NSLogVerbose(@"DDFileLogger: Rolling log file due to age...");
+        NSLogVerbose(@"TMPFileLogger: Rolling log file due to age...");
         [self lt_rollLogFileNow];
     } else {
         [self lt_scheduleTimerToRollLogFileDueToAge];
@@ -929,7 +929,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
         unsigned long long fileSize = [_currentLogFileHandle offsetInFile];
 
         if (fileSize >= _maximumFileSize) {
-            NSLogVerbose(@"DDFileLogger: Rolling log file due to size (%qu)...", fileSize);
+            NSLogVerbose(@"TMPFileLogger: Rolling log file due to size (%qu)...", fileSize);
 
             [self lt_rollLogFileNow];
         }
@@ -940,7 +940,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 #pragma mark File Logging
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)lt_shouldLogFileBeArchived:(DDLogFileInfo *)mostRecentLogFileInfo {
+- (BOOL)lt_shouldLogFileBeArchived:(TMPLogFileInfo *)mostRecentLogFileInfo {
     NSAssert([self isOnInternalLoggerQueue], @"lt_ methods should be on logger queue.");
 
     if (mostRecentLogFileInfo.isArchived) {
@@ -985,20 +985,20 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
  *
  * Otherwise a new file is created and returned.
  **/
-- (DDLogFileInfo *)currentLogFileInfo {
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+- (TMPLogFileInfo *)currentLogFileInfo {
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
     // Do not access this method on any Lumberjack queue, will deadlock.
 
     NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
     NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 
-    __block DDLogFileInfo *info = nil;
+    __block TMPLogFileInfo *info = nil;
     dispatch_block_t block = ^{
         info = [self lt_currentLogFileInfo];
     };
 
-    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
 
     dispatch_sync(globalLoggingQueue, ^{
         dispatch_sync(self->_loggerQueue, block);
@@ -1007,11 +1007,11 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
     return info;
 }
 
-- (DDLogFileInfo *)lt_currentLogFileInfo {
+- (TMPLogFileInfo *)lt_currentLogFileInfo {
     NSAssert([self isOnInternalLoggerQueue], @"lt_ methods should be on logger queue.");
 
     // Get the current log file info ivar (might be nil).
-    DDLogFileInfo *newCurrentLogFile = _currentLogFileInfo;
+    TMPLogFileInfo *newCurrentLogFile = _currentLogFileInfo;
 
     // Check if we're resuming and if so, get the first of the sorted log file infos.
     BOOL isResuming = newCurrentLogFile == nil;
@@ -1023,18 +1023,18 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
     // Check if the file we've found is still valid. Otherwise create a new one.
     if (newCurrentLogFile != nil && [self lt_shouldUseLogFile:newCurrentLogFile isResuming:isResuming]) {
         if (isResuming) {
-            NSLogVerbose(@"DDFileLogger: Resuming logging with file %@", newCurrentLogFile.fileName);
+            NSLogVerbose(@"TMPFileLogger: Resuming logging with file %@", newCurrentLogFile.fileName);
         }
         _currentLogFileInfo = newCurrentLogFile;
     } else {
         NSString *currentLogFilePath = [_logFileManager createNewLogFile];
-        _currentLogFileInfo = [[DDLogFileInfo alloc] initWithFilePath:currentLogFilePath];
+        _currentLogFileInfo = [[TMPLogFileInfo alloc] initWithFilePath:currentLogFilePath];
     }
 
     return _currentLogFileInfo;
 }
 
-- (BOOL)lt_shouldUseLogFile:(nonnull DDLogFileInfo *)logFileInfo isResuming:(BOOL)isResuming {
+- (BOOL)lt_shouldUseLogFile:(nonnull TMPLogFileInfo *)logFileInfo isResuming:(BOOL)isResuming {
     NSAssert([self isOnInternalLoggerQueue], @"lt_ methods should be on logger queue.");
     NSParameterAssert(logFileInfo);
 
@@ -1073,7 +1073,7 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 
     __weak __auto_type weakSelf = self;
     dispatch_source_set_event_handler(_currentLogFileVnode, ^{ @autoreleasepool {
-        NSLogInfo(@"DDFileLogger: Current logfile was moved. Rolling it and creating a new one");
+        NSLogInfo(@"TMPFileLogger: Current logfile was moved. Rolling it and creating a new one");
         [weakSelf lt_rollLogFileNow];
     } });
 
@@ -1105,12 +1105,12 @@ unsigned long long const kDDDefaultLogFilesDiskQuota   = 20 * 1024 * 1024; // 20
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark DDLogger Protocol
+#pragma mark TMPLogger Protocol
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static int exception_count = 0;
 
-- (void)logMessage:(DDLogMessage *)logMessage {
+- (void)logMessage:(TMPLogMessage *)logMessage {
     NSAssert([self isOnInternalLoggerQueue], @"logMessage should only be executed on internal queue.");
 
     NSString *message = logMessage->_message;
@@ -1133,15 +1133,15 @@ static int exception_count = 0;
     [self lt_logData:[message dataUsingEncoding:NSUTF8StringEncoding]];
 }
 
-- (void)willLogMessage:(DDLogFileInfo *)logFileInfo {
+- (void)willLogMessage:(TMPLogFileInfo *)logFileInfo {
 
 }
 
-- (void)didLogMessage:(DDLogFileInfo *)logFileInfo {
+- (void)didLogMessage:(TMPLogFileInfo *)logFileInfo {
     [self lt_maybeRollLogFileDueToSize];
 }
 
-- (BOOL)shouldArchiveRecentLogFileInfo:(__unused DDLogFileInfo *)recentLogFileInfo {
+- (BOOL)shouldArchiveRecentLogFileInfo:(__unused TMPLogFileInfo *)recentLogFileInfo {
     return NO;
 }
 
@@ -1159,13 +1159,13 @@ static int exception_count = 0;
         }
     };
 
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_sync(globalLoggingQueue, ^{
@@ -1179,13 +1179,13 @@ static int exception_count = 0;
     [_currentLogFileHandle synchronizeFile];
 }
 
-- (DDLoggerName)loggerName {
-    return DDLoggerNameFile;
+- (TMPLoggerName)loggerName {
+    return TMPLoggerNameFile;
 }
 
 @end
 
-@implementation DDFileLogger (Internal)
+@implementation TMPFileLogger (Internal)
 
 - (void)logData:(NSData *)data {
     // This method is public.
@@ -1197,13 +1197,13 @@ static int exception_count = 0;
         }
     };
 
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_sync(globalLoggingQueue, ^{
@@ -1272,16 +1272,16 @@ static int exception_count = 0;
         exception_count++;
 
         if (exception_count <= 10) {
-            NSLogError(@"DDFileLogger.logMessage: %@", exception);
+            NSLogError(@"TMPFileLogger.logMessage: %@", exception);
 
             if (exception_count == 10) {
-                NSLogError(@"DDFileLogger.logMessage: Too many exceptions -- will not log any more of them.");
+                NSLogError(@"TMPFileLogger.logMessage: Too many exceptions -- will not log any more of them.");
             }
         }
     }
 }
 
-- (NSData *)lt_dataForMessage:(DDLogMessage *)logMessage {
+- (NSData *)lt_dataForMessage:(TMPLogMessage *)logMessage {
     NSAssert([self isOnInternalLoggerQueue], @"logMessage should only be executed on internal queue.");
 
     NSString *message = logMessage->_message;
@@ -1311,12 +1311,12 @@ static int exception_count = 0;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if TARGET_IPHONE_SIMULATOR
-    static NSString * const kDDXAttrArchivedName = @"archived";
+    static NSString * const kTMPXAttrArchivedName = @"archived";
 #else
-    static NSString * const kDDXAttrArchivedName = @"lumberjack.log.archived";
+    static NSString * const kTMPXAttrArchivedName = @"lumberjack.log.archived";
 #endif
 
-@interface DDLogFileInfo () {
+@interface TMPLogFileInfo () {
     __strong NSString *_filePath;
     __strong NSString *_fileName;
 
@@ -1331,7 +1331,7 @@ static int exception_count = 0;
 @end
 
 
-@implementation DDLogFileInfo
+@implementation TMPLogFileInfo
 
 @synthesize filePath;
 
@@ -1369,7 +1369,7 @@ static int exception_count = 0;
         _fileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:&error];
 
         if (error) {
-            NSLogError(@"DDLogFileInfo: Failed to read file attributes: %@", error);
+            NSLogError(@"TMPLogFileInfo: Failed to read file attributes: %@", error);
         }
     }
 
@@ -1434,11 +1434,11 @@ static int exception_count = 0;
     // So we have to use a less attractive alternative.
     // See full explanation in the header file.
 
-    return [self hasExtensionAttributeWithName:kDDXAttrArchivedName];
+    return [self hasExtensionAttributeWithName:kTMPXAttrArchivedName];
 
 #else
 
-    return [self hasExtendedAttributeWithName:kDDXAttrArchivedName];
+    return [self hasExtendedAttributeWithName:kTMPXAttrArchivedName];
 
 #endif
 }
@@ -1451,17 +1451,17 @@ static int exception_count = 0;
     // See full explanation in the header file.
 
     if (flag) {
-        [self addExtensionAttributeWithName:kDDXAttrArchivedName];
+        [self addExtensionAttributeWithName:kTMPXAttrArchivedName];
     } else {
-        [self removeExtensionAttributeWithName:kDDXAttrArchivedName];
+        [self removeExtensionAttributeWithName:kTMPXAttrArchivedName];
     }
 
 #else
 
     if (flag) {
-        [self addExtendedAttributeWithName:kDDXAttrArchivedName];
+        [self addExtendedAttributeWithName:kTMPXAttrArchivedName];
     } else {
-        [self removeExtendedAttributeWithName:kDDXAttrArchivedName];
+        [self removeExtendedAttributeWithName:kTMPXAttrArchivedName];
     }
 
 #endif
@@ -1496,7 +1496,7 @@ static int exception_count = 0;
 
         BOOL success = [[NSFileManager defaultManager] removeItemAtPath:newFilePath error:&error];
         if (!success && error.code != NSFileNoSuchFileError) {
-            NSLogError(@"DDLogFileInfo: Error deleting archive (%@): %@", self.fileName, error);
+            NSLogError(@"TMPLogFileInfo: Error deleting archive (%@): %@", self.fileName, error);
         }
 
         success = [[NSFileManager defaultManager] moveItemAtPath:filePath toPath:newFilePath error:&error];
@@ -1510,7 +1510,7 @@ static int exception_count = 0;
 #else
         if (!success) {
 #endif
-            NSLogError(@"DDLogFileInfo: Error renaming file (%@): %@", self.fileName, error);
+            NSLogError(@"TMPLogFileInfo: Error renaming file (%@): %@", self.fileName, error);
         }
 
         filePath = newFilePath;
@@ -1675,7 +1675,7 @@ static int exception_count = 0;
     int result = setxattr(path, name, NULL, 0, 0, 0);
 
     if (result < 0) {
-        NSLogError(@"DDLogFileInfo: setxattr(%@, %@): error = %s",
+        NSLogError(@"TMPLogFileInfo: setxattr(%@, %@): error = %s",
                    attrName,
                    filePath,
                    strerror(errno));
@@ -1689,7 +1689,7 @@ static int exception_count = 0;
     int result = removexattr(path, name, 0);
 
     if (result < 0 && errno != ENOATTR) {
-        NSLogError(@"DDLogFileInfo: removexattr(%@, %@): error = %s",
+        NSLogError(@"TMPLogFileInfo: removexattr(%@, %@): error = %s",
                    attrName,
                    self.fileName,
                    strerror(errno));
@@ -1704,7 +1704,7 @@ static int exception_count = 0;
 
 - (BOOL)isEqual:(id)object {
     if ([object isKindOfClass:[self class]]) {
-        DDLogFileInfo *another = (DDLogFileInfo *)object;
+        TMPLogFileInfo *another = (TMPLogFileInfo *)object;
 
         return [filePath isEqualToString:[another filePath]];
     }
@@ -1716,13 +1716,13 @@ static int exception_count = 0;
     return [filePath hash];
 }
 
-- (NSComparisonResult)reverseCompareByCreationDate:(DDLogFileInfo *)another {
+- (NSComparisonResult)reverseCompareByCreationDate:(TMPLogFileInfo *)another {
     __auto_type us = [self creationDate];
     __auto_type them = [another creationDate];
     return [them compare:us];
 }
 
-- (NSComparisonResult)reverseCompareByModificationDate:(DDLogFileInfo *)another {
+- (NSComparisonResult)reverseCompareByModificationDate:(TMPLogFileInfo *)another {
     __auto_type us = [self modificationDate];
     __auto_type them = [another modificationDate];
     return [them compare:us];

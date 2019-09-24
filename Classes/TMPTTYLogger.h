@@ -14,11 +14,11 @@
 //   prior written permission of Deusty, LLC.
 
 // Disable legacy macros
-#ifndef DD_LEGACY_MACROS
-    #define DD_LEGACY_MACROS 0
+#ifndef TMP_LEGACY_MACROS
+    #define TMP_LEGACY_MACROS 0
 #endif
 
-#import <CocoaLumberjack/DDLog.h>
+#import <CocoaLumberjack/TMPLog.h>
 
 #define LOG_CONTEXT_ALL INT_MAX
 
@@ -27,18 +27,18 @@
 #if !(TARGET_OS_OSX)
     // iOS or tvOS or watchOS
     #import <UIKit/UIColor.h>
-    typedef UIColor DDColor;
-    static inline DDColor* DDMakeColor(CGFloat r, CGFloat g, CGFloat b) {return [DDColor colorWithRed:(r/255.0f) green:(g/255.0f) blue:(b/255.0f) alpha:1.0f];}
-#elif defined(DD_CLI) || !__has_include(<AppKit/NSColor.h>)
+    typedef UIColor TMPColor;
+    static inline TMPColor* TMPMakeColor(CGFloat r, CGFloat g, CGFloat b) {return [TMPColor colorWithRed:(r/255.0f) green:(g/255.0f) blue:(b/255.0f) alpha:1.0f];}
+#elif defined(TMP_CLI) || !__has_include(<AppKit/NSColor.h>)
     // OS X CLI
     #import <CocoaLumberjack/CLIColor.h>
-    typedef CLIColor DDColor;
-    static inline DDColor* DDMakeColor(CGFloat r, CGFloat g, CGFloat b) {return [DDColor colorWithCalibratedRed:(r/255.0f) green:(g/255.0f) blue:(b/255.0f) alpha:1.0f];}
+    typedef CLIColor TMPColor;
+    static inline TMPColor* TMPMakeColor(CGFloat r, CGFloat g, CGFloat b) {return [TMPColor colorWithCalibratedRed:(r/255.0f) green:(g/255.0f) blue:(b/255.0f) alpha:1.0f];}
 #else
     // OS X with AppKit
     #import <AppKit/NSColor.h>
-    typedef NSColor DDColor;
-    static inline DDColor* DDMakeColor(CGFloat r, CGFloat g, CGFloat b) {return [DDColor colorWithCalibratedRed:(r/255.0f) green:(g/255.0f) blue:(b/255.0f) alpha:1.0f];}
+    typedef NSColor TMPColor;
+    static inline TMPColor* TMPMakeColor(CGFloat r, CGFloat g, CGFloat b) {return [TMPColor colorWithCalibratedRed:(r/255.0f) green:(g/255.0f) blue:(b/255.0f) alpha:1.0f];}
 #endif
 #pragma clang diagnostic pop
 
@@ -57,14 +57,14 @@
  * However, if you instead choose to use file logging (for faster performance),
  * you may choose to use only a file logger and a tty logger.
  **/
-@interface DDTTYLogger : DDAbstractLogger <DDLogger>
+@interface TMPTTYLogger : TMPAbstractLogger <TMPLogger>
 
 /**
  *  Singleton method
  */
-@property (class, readonly, strong) DDTTYLogger *sharedInstance;
+@property (class, readonly, strong) TMPTTYLogger *sharedInstance;
 
-/* Inherited from the DDLogger protocol:
+/* Inherited from the TMPLogger protocol:
  *
  * Formatters may optionally be added to any logger.
  *
@@ -74,10 +74,10 @@
  * More information about formatters can be found here:
  * Documentation/CustomFormatters.md
  *
- * The actual implementation of these methods is inherited from DDAbstractLogger.
+ * The actual implementation of these methods is inherited from TMPAbstractLogger.
 
-   - (id <DDLogFormatter>)logFormatter;
-   - (void)setLogFormatter:(id <DDLogFormatter>)formatter;
+   - (id <TMPLogFormatter>)logFormatter;
+   - (void)setLogFormatter:(id <TMPLogFormatter>)formatter;
 
  */
 
@@ -106,26 +106,26 @@
 /**
  * The default color set (foregroundColor, backgroundColor) is:
  *
- * - DDLogFlagError   = (red, nil)
- * - DDLogFlagWarning = (orange, nil)
+ * - TMPLogFlagError   = (red, nil)
+ * - TMPLogFlagWarning = (orange, nil)
  *
  * You can customize the colors however you see fit.
  * Please note that you are passing a flag, NOT a level.
  *
- * GOOD : [ttyLogger setForegroundColor:pink backgroundColor:nil forFlag:DDLogFlagInfo];  // <- Good :)
- *  BAD : [ttyLogger setForegroundColor:pink backgroundColor:nil forFlag:DDLogLevelInfo]; // <- BAD! :(
+ * GOOD : [ttyLogger setForegroundColor:pink backgroundColor:nil forFlag:TMPLogFlagInfo];  // <- Good :)
+ *  BAD : [ttyLogger setForegroundColor:pink backgroundColor:nil forFlag:TMPLogLevelInfo]; // <- BAD! :(
  *
- * DDLogFlagInfo  = 0...00100
- * DDLogLevelInfo = 0...00111 <- Would match DDLogFlagInfo and DDLogFlagWarning and DDLogFlagError
+ * TMPLogFlagInfo  = 0...00100
+ * TMPLogLevelInfo = 0...00111 <- Would match TMPLogFlagInfo and TMPLogFlagWarning and TMPLogFlagError
  *
  * If you run the application within Xcode, then the XcodeColors plugin is required.
  *
- * If you run the application from a shell, then DDTTYLogger will automatically map the given color to
+ * If you run the application from a shell, then TMPTTYLogger will automatically map the given color to
  * the closest available color. (xterm-256color or xterm-color which have 256 and 16 supported colors respectively.)
  *
  * This method invokes setForegroundColor:backgroundColor:forFlag:context: and applies it to `LOG_CONTEXT_ALL`.
  **/
-- (void)setForegroundColor:(DDColor *)txtColor backgroundColor:(DDColor *)bgColor forFlag:(DDLogFlag)mask;
+- (void)setForegroundColor:(TMPColor *)txtColor backgroundColor:(TMPColor *)bgColor forFlag:(TMPLogFlag)mask;
 
 /**
  * Just like setForegroundColor:backgroundColor:flag, but allows you to specify a particular logging context.
@@ -138,38 +138,38 @@
  * Logging context's are explained in further detail here:
  * Documentation/CustomContext.md
  **/
-- (void)setForegroundColor:(DDColor *)txtColor backgroundColor:(DDColor *)bgColor forFlag:(DDLogFlag)mask context:(NSInteger)ctxt;
+- (void)setForegroundColor:(TMPColor *)txtColor backgroundColor:(TMPColor *)bgColor forFlag:(TMPLogFlag)mask context:(NSInteger)ctxt;
 
 /**
- * Similar to the methods above, but allows you to map DDLogMessage->tag to a particular color profile.
+ * Similar to the methods above, but allows you to map TMPLogMessage->tag to a particular color profile.
  * For example, you could do something like this:
  *
  * static NSString *const PurpleTag = @"PurpleTag";
  *
- * #define DDLogPurple(frmt, ...) LOG_OBJC_TAG_MACRO(NO, 0, 0, 0, PurpleTag, frmt, ##__VA_ARGS__)
+ * #define TMPLogPurple(frmt, ...) LOG_OBJC_TAG_MACRO(NO, 0, 0, 0, PurpleTag, frmt, ##__VA_ARGS__)
  * 
  * And then where you configure CocoaLumberjack:
  *
- * purple = DDMakeColor((64/255.0), (0/255.0), (128/255.0));
+ * purple = TMPMakeColor((64/255.0), (0/255.0), (128/255.0));
  *
  * or any UIColor/NSColor constructor.
  *
  * Note: For CLI OS X projects that don't link with AppKit use CLIColor objects instead
  *
- * [[DDTTYLogger sharedInstance] setForegroundColor:purple backgroundColor:nil forTag:PurpleTag];
- * [DDLog addLogger:[DDTTYLogger sharedInstance]];
+ * [[TMPTTYLogger sharedInstance] setForegroundColor:purple backgroundColor:nil forTag:PurpleTag];
+ * [TMPLog addLogger:[TMPTTYLogger sharedInstance]];
  *
  * This would essentially give you a straight NSLog replacement that prints in purple:
  *
- * DDLogPurple(@"I'm a purple log message!");
+ * TMPLogPurple(@"I'm a purple log message!");
  **/
-- (void)setForegroundColor:(DDColor *)txtColor backgroundColor:(DDColor *)bgColor forTag:(id <NSCopying>)tag;
+- (void)setForegroundColor:(TMPColor *)txtColor backgroundColor:(TMPColor *)bgColor forTag:(id <NSCopying>)tag;
 
 /**
  * Clearing color profiles.
  **/
-- (void)clearColorsForFlag:(DDLogFlag)mask;
-- (void)clearColorsForFlag:(DDLogFlag)mask context:(NSInteger)context;
+- (void)clearColorsForFlag:(TMPLogFlag)mask;
+- (void)clearColorsForFlag:(TMPLogFlag)mask context:(NSInteger)context;
 - (void)clearColorsForTag:(id <NSCopying>)tag;
 - (void)clearColorsForAllFlags;
 - (void)clearColorsForAllTags;

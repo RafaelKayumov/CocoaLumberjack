@@ -212,7 +212,7 @@ PROVISIONING_PROFILE_SPECIFIER =
 // Activating this setting will cause Xcode to run the `Clang` static analysis tool on qualifying source files during every build.
 RUN_CLANG_STATIC_ANALYZER = YES
 
-// The name or path of the base SDK being used during the build. The product will be built against the headers and libraries located inside the indicated SDK. This path will be prepended to all search paths, and will be passed through the environment to the compiler and linker. Additional SDKs can be specified in the `ADDITIONAL_SDKS` setting.
+// The name or path of the base SDK being used during the build. The product will be built against the headers and libraries located inside the indicated SDK. This path will be prepended to all search paths, and will be passed through the environment to the compiler and linker. Additional SDKs can be specified in the `ATMPITIONAL_SDKS` setting.
 SDKROOT = macosx
 
 // If enabled, don't install built products even if deployment locations are active.

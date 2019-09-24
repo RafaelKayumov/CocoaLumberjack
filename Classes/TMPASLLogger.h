@@ -16,17 +16,17 @@
 #import <Foundation/Foundation.h>
 
 // Disable legacy macros
-#ifndef DD_LEGACY_MACROS
-    #define DD_LEGACY_MACROS 0
+#ifndef TMP_LEGACY_MACROS
+    #define TMP_LEGACY_MACROS 0
 #endif
 
-#import <CocoaLumberjack/DDLog.h>
+#import <CocoaLumberjack/TMPLog.h>
 
 // Custom key set on messages sent to ASL
-extern const char* const kDDASLKeyDDLog;
+extern const char* const kTMPASLKeyTMPLog;
 
-// Value set for kDDASLKeyDDLog
-extern const char* const kDDASLDDLogValue;
+// Value set for kTMPASLKeyTMPLog
+extern const char* const kTMPASLTMPLogValue;
 
 /**
  * This class provides a logger for the Apple System Log facility.
@@ -41,19 +41,19 @@ extern const char* const kDDASLDDLogValue;
  * However, if you instead choose to use file logging (for faster performance),
  * you may choose to use a file logger and a tty logger.
  **/
-API_DEPRECATED("Use DDOSLogger instead", macosx(10.4,10.12), ios(2.0,10.0), watchos(2.0,3.0), tvos(9.0,10.0))
-@interface DDASLLogger : DDAbstractLogger <DDLogger>
+API_DEPRECATED("Use TMPOSLogger instead", macosx(10.4,10.12), ios(2.0,10.0), watchos(2.0,3.0), tvos(9.0,10.0))
+@interface TMPASLLogger : TMPAbstractLogger <TMPLogger>
 
 /**
  *  Singleton method
  *
  *  @return the shared instance
  */
-@property (class, readonly, strong) DDASLLogger *sharedInstance;
+@property (class, readonly, strong) TMPASLLogger *sharedInstance;
 
-// Inherited from DDAbstractLogger
+// Inherited from TMPAbstractLogger
 
-// - (id <DDLogFormatter>)logFormatter;
-// - (void)setLogFormatter:(id <DDLogFormatter>)formatter;
+// - (id <TMPLogFormatter>)logFormatter;
+// - (void)setLogFormatter:(id <TMPLogFormatter>)formatter;
 
 @end

@@ -13,11 +13,11 @@
 //   to endorse or promote products derived from this software without specific
 //   prior written permission of Deusty, LLC.
 
-#import "DDOSLogger.h"
+#import "TMPOSLogger.h"
 
 #import <os/log.h>
 
-@interface DDOSLogger () {
+@interface TMPOSLogger () {
     NSString *_subsystem;
     NSString *_category;
 }
@@ -26,7 +26,7 @@
 @property (strong, nonatomic, readwrite) os_log_t  logger;
 @end
 
-@implementation DDOSLogger
+@implementation TMPOSLogger
 
 @synthesize subsystem = _subsystem;
 @synthesize category = _category;
@@ -46,16 +46,16 @@
     return self;
 }
 
-static DDOSLogger *sharedInstance;
+static TMPOSLogger *sharedInstance;
 
 - (instancetype)init {
     return [self initWithSubsystem:nil category:nil];
 }
 
 + (instancetype)sharedInstance {
-    static dispatch_once_t DDOSLoggerOnceToken;
+    static dispatch_once_t TMPOSLoggerOnceToken;
 
-    dispatch_once(&DDOSLoggerOnceToken, ^{
+    dispatch_once(&TMPOSLoggerOnceToken, ^{
         sharedInstance = [[[self class] alloc] init];
     });
 
@@ -80,11 +80,11 @@ static DDOSLogger *sharedInstance;
     return _logger;
 }
 
-#pragma mark - DDLogger
+#pragma mark - TMPLogger
 
-- (void)logMessage:(DDLogMessage *)logMessage {
+- (void)logMessage:(TMPLogMessage *)logMessage {
     // Skip captured log messages
-    if ([logMessage->_fileName isEqualToString:@"DDASLLogCapture"]) {
+    if ([logMessage->_fileName isEqualToString:@"TMPASLLogCapture"]) {
         return;
     }
 
@@ -95,15 +95,15 @@ static DDOSLogger *sharedInstance;
             const char *msg = [message UTF8String];
             __auto_type logger = [self logger];
             switch (logMessage->_flag) {
-                case DDLogFlagError     :
+                case TMPLogFlagError     :
                     os_log_error(logger, "%{public}s", msg);
                     break;
-                case DDLogFlagWarning   :
-                case DDLogFlagInfo      :
+                case TMPLogFlagWarning   :
+                case TMPLogFlagInfo      :
                     os_log_info(logger, "%{public}s", msg);
                     break;
-                case DDLogFlagDebug     :
-                case DDLogFlagVerbose   :
+                case TMPLogFlagDebug     :
+                case TMPLogFlagVerbose   :
                 default                 :
                     os_log_debug(logger, "%{public}s", msg);
                     break;
@@ -114,7 +114,7 @@ static DDOSLogger *sharedInstance;
 
 }
 
-- (DDLoggerName)loggerName {
-    return DDLoggerNameOS;
+- (TMPLoggerName)loggerName {
+    return TMPLoggerNameOS;
 }
 @end

@@ -14,15 +14,15 @@
 //   prior written permission of Deusty, LLC.
 
 // Disable legacy macros
-#ifndef DD_LEGACY_MACROS
-    #define DD_LEGACY_MACROS 0
+#ifndef TMP_LEGACY_MACROS
+    #define TMP_LEGACY_MACROS 0
 #endif
 
-#import <CocoaLumberjack/DDLog.h>
+#import <CocoaLumberjack/TMPLog.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class DDLogFileInfo;
+@class TMPLogFileInfo;
 
 /**
  * This class provides a logger to write log statements to a file.
@@ -31,17 +31,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Default configuration and safety/sanity values.
 //
-// maximumFileSize         -> kDDDefaultLogMaxFileSize
-// rollingFrequency        -> kDDDefaultLogRollingFrequency
-// maximumNumberOfLogFiles -> kDDDefaultLogMaxNumLogFiles
-// logFilesDiskQuota       -> kDDDefaultLogFilesDiskQuota
+// maximumFileSize         -> kTMPDefaultLogMaxFileSize
+// rollingFrequency        -> kTMPDefaultLogRollingFrequency
+// maximumNumberOfLogFiles -> kTMPDefaultLogMaxNumLogFiles
+// logFilesDiskQuota       -> kTMPDefaultLogFilesDiskQuota
 //
 // You should carefully consider the proper configuration values for your application.
 
-extern unsigned long long const kDDDefaultLogMaxFileSize;
-extern NSTimeInterval     const kDDDefaultLogRollingFrequency;
-extern NSUInteger         const kDDDefaultLogMaxNumLogFiles;
-extern unsigned long long const kDDDefaultLogFilesDiskQuota;
+extern unsigned long long const kTMPDefaultLogMaxFileSize;
+extern NSTimeInterval     const kTMPDefaultLogRollingFrequency;
+extern NSUInteger         const kTMPDefaultLogMaxNumLogFiles;
+extern unsigned long long const kTMPDefaultLogFilesDiskQuota;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,11 +67,11 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
  *  with the most recently created log file at index 0, and the oldest log file at the end of the array.
  *
  *  You can fetch only the log file paths (full path including name), log file names (name only),
- *  or an array of `DDLogFileInfo` objects.
- *  The `DDLogFileInfo` class is documented below, and provides a handy wrapper that
+ *  or an array of `TMPLogFileInfo` objects.
+ *  The `TMPLogFileInfo` class is documented below, and provides a handy wrapper that
  *  gives you easy access to various file attributes such as the creation date or the file size.
  */
-@protocol DDLogFileManager <NSObject>
+@protocol TMPLogFileManager <NSObject>
 @required
 
 // Public properties
@@ -114,11 +114,11 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
 @property (nonatomic, readonly, strong) NSArray<NSString *> *unsortedLogFileNames;
 
 /**
- * Returns an array of `DDLogFileInfo` objects,
+ * Returns an array of `TMPLogFileInfo` objects,
  * each representing an existing log file on disk,
  * and containing important information about the log file such as it's modification date and size.
  **/
-@property (nonatomic, readonly, strong) NSArray<DDLogFileInfo *> *unsortedLogFileInfos;
+@property (nonatomic, readonly, strong) NSArray<TMPLogFileInfo *> *unsortedLogFileInfos;
 
 /**
  * Just like the `unsortedLogFilePaths` method, but sorts the array.
@@ -139,9 +139,9 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
  * The items in the array are sorted by creation date.
  * The first item in the array will be the most recently created log file.
  **/
-@property (nonatomic, readonly, strong) NSArray<DDLogFileInfo *> *sortedLogFileInfos;
+@property (nonatomic, readonly, strong) NSArray<TMPLogFileInfo *> *sortedLogFileInfos;
 
-// Private methods (only to be used by DDFileLogger)
+// Private methods (only to be used by TMPFileLogger)
 
 /**
  * Generates a new unique log file path, and creates the corresponding log file.
@@ -152,7 +152,7 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
 
 @optional
 
-// Notifications from DDFileLogger
+// Notifications from TMPFileLogger
 
 /**
  *  Called when a log file was archived. Executed on global queue with default priority.
@@ -184,7 +184,7 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
  *
  * Archived log files are automatically deleted according to the `maximumNumberOfLogFiles` property.
  **/
-@interface DDLogFileManagerDefault : NSObject <DDLogFileManager>
+@interface TMPLogFileManagerDefault : NSObject <TMPLogFileManager>
 
 /**
  *  Default initializer
@@ -263,7 +263,7 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
  **/
 @property (readonly, copy, nullable) NSString *logFileHeader;
 
-/* Inherited from DDLogFileManager protocol:
+/* Inherited from TMPLogFileManager protocol:
 
    @property (readwrite, assign, atomic) NSUInteger maximumNumberOfLogFiles;
    @property (readwrite, assign, atomic) NSUInteger logFilesDiskQuota;
@@ -296,7 +296,7 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
  * In addition to the convenience of having a logical default formatter,
  * it will also provide a template that makes it easy for developers to copy and change.
  **/
-@interface DDLogFileFormatterDefault : NSObject <DDLogFormatter>
+@interface TMPLogFileFormatterDefault : NSObject <TMPLogFormatter>
 
 /**
  *  Default initializer
@@ -317,7 +317,7 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
 /**
  *  The standard implementation for a file logger
  */
-@interface DDFileLogger : DDAbstractLogger <DDLogger>
+@interface TMPFileLogger : TMPAbstractLogger <TMPLogger>
 
 /**
  *  Default initializer.
@@ -325,18 +325,18 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
 - (instancetype)init;
 
 /**
- *  Designated initializer, requires a `DDLogFileManager` instance.
+ *  Designated initializer, requires a `TMPLogFileManager` instance.
  *  A global queue w/ default priority is used to run callbacks.
  *  If needed, specify queue using `initWithLogFileManager:completionQueue:`.
  */
-- (instancetype)initWithLogFileManager:(id <DDLogFileManager> __nullable)logFileManager;
+- (instancetype)initWithLogFileManager:(id <TMPLogFileManager> __nullable)logFileManager;
 
 /**
- *  Designated initializer, requires a `DDLogFileManager` instance.
+ *  Designated initializer, requires a `TMPLogFileManager` instance.
  *  The completionQueue is used to execute `didArchiveLogFile`, `didRollAndArchiveLogFile`,
  *  and the callback in `rollLog`. If nil, a global queue w/ default priority is used.
  */
-- (instancetype)initWithLogFileManager:(id <DDLogFileManager> __nullable)logFileManager
+- (instancetype)initWithLogFileManager:(id <TMPLogFileManager> __nullable)logFileManager
                        completionQueue:(dispatch_queue_t __nullable)dispatchQueue NS_DESIGNATED_INITIALIZER;
 
 /**
@@ -352,16 +352,16 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
 /**
  *  Called when the logger is about to write message. Call super before your implementation.
  */
-- (void)willLogMessage:(DDLogFileInfo *)logFileInfo NS_REQUIRES_SUPER;
+- (void)willLogMessage:(TMPLogFileInfo *)logFileInfo NS_REQUIRES_SUPER;
 
 /**
  *  Called when the logger wrote message. Call super after your implementation.
  */
-- (void)didLogMessage:(DDLogFileInfo *)logFileInfo NS_REQUIRES_SUPER;
+- (void)didLogMessage:(TMPLogFileInfo *)logFileInfo NS_REQUIRES_SUPER;
 
 /**
  *  Writes all in-memory log data to the permanent storage. Call super before your implementation.
- *  Don't call this method directly, instead use the `[DDLog flushLog]` to ensure all log messages are included in flush.
+ *  Don't call this method directly, instead use the `[TMPLog flushLog]` to ensure all log messages are included in flush.
  */
 - (void)flush NS_REQUIRES_SUPER;
 
@@ -370,7 +370,7 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
  *  Override this method to extend standard behavior. By default returns NO.
  *  This is executed directly on the logger's internal queue, so keep processing light!
  */
-- (BOOL)shouldArchiveRecentLogFileInfo:(DDLogFileInfo *)recentLogFileInfo;
+- (BOOL)shouldArchiveRecentLogFileInfo:(TMPLogFileInfo *)recentLogFileInfo;
 
 /**
  * Log File Rolling:
@@ -419,12 +419,12 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
 @property (readwrite, assign, atomic) BOOL doNotReuseLogFiles;
 
 /**
- * The DDLogFileManager instance can be used to retrieve the list of log files,
+ * The TMPLogFileManager instance can be used to retrieve the list of log files,
  * and configure the maximum number of archived log files to keep.
  *
- * @see DDLogFileManager.maximumNumberOfLogFiles
+ * @see TMPLogFileManager.maximumNumberOfLogFiles
  **/
-@property (strong, nonatomic, readonly) id <DDLogFileManager> logFileManager;
+@property (strong, nonatomic, readonly) id <TMPLogFileManager> logFileManager;
 
 /**
  * When using a custom formatter you can set the `logMessage` method not to append
@@ -446,10 +446,10 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
  */
 - (void)rollLogFile __attribute((deprecated));
 
-// Inherited from DDAbstractLogger
+// Inherited from TMPAbstractLogger
 
-// - (id <DDLogFormatter>)logFormatter;
-// - (void)setLogFormatter:(id <DDLogFormatter>)formatter;
+// - (id <TMPLogFormatter>)logFormatter;
+// - (void)setLogFormatter:(id <TMPLogFormatter>)formatter;
 
 /**
  * Returns the log file that should be used.
@@ -458,7 +458,7 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
  *
  * Otherwise a new file is created and returned.
  **/
-@property (nonatomic, readonly, strong) DDLogFileInfo *currentLogFileInfo;
+@property (nonatomic, readonly, strong) TMPLogFileInfo *currentLogFileInfo;
 
 @end
 
@@ -467,7 +467,7 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * `DDLogFileInfo` is a simple class that provides access to various file attributes.
+ * `TMPLogFileInfo` is a simple class that provides access to various file attributes.
  * It provides good performance as it only fetches the information if requested,
  * and it caches the information to prevent duplicate fetches.
  *
@@ -480,7 +480,7 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
  * If you absolutely must get updated values,
  * you can invoke the reset method which will clear the cache.
  **/
-@interface DDLogFileInfo : NSObject
+@interface TMPLogFileInfo : NSObject
 
 @property (strong, nonatomic, readonly) NSString *filePath;
 @property (strong, nonatomic, readonly) NSString *fileName;
@@ -547,8 +547,8 @@ extern unsigned long long const kDDDefaultLogFilesDiskQuota;
 
 #endif /* if TARGET_IPHONE_SIMULATOR */
 
-- (NSComparisonResult)reverseCompareByCreationDate:(DDLogFileInfo *)another;
-- (NSComparisonResult)reverseCompareByModificationDate:(DDLogFileInfo *)another;
+- (NSComparisonResult)reverseCompareByCreationDate:(TMPLogFileInfo *)another;
+- (NSComparisonResult)reverseCompareByModificationDate:(TMPLogFileInfo *)another;
 
 @end
 

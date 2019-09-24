@@ -16,30 +16,30 @@
 /**
  * Legacy macros used for 1.9.x backwards compatibility.
  *
- * Imported by default when importing a DDLog.h directly and DD_LEGACY_MACROS is not defined and set to 0.
+ * Imported by default when importing a TMPLog.h directly and TMP_LEGACY_MACROS is not defined and set to 0.
  **/
-#if DD_LEGACY_MACROS
+#if TMP_LEGACY_MACROS
 
 #warning CocoaLumberjack 1.9.x legacy macros enabled. \
-Disable legacy macros by importing CocoaLumberjack.h or DDLogMacros.h instead of DDLog.h or add `#define DD_LEGACY_MACROS 0` before importing DDLog.h.
+Disable legacy macros by importing CocoaLumberjack.h or TMPLogMacros.h instead of TMPLog.h or add `#define TMP_LEGACY_MACROS 0` before importing TMPLog.h.
 
 #ifndef LOG_LEVEL_DEF
-    #define LOG_LEVEL_DEF ddLogLevel
+    #define LOG_LEVEL_DEF tmpLogLevel
 #endif
 
-#define LOG_FLAG_ERROR    DDLogFlagError
-#define LOG_FLAG_WARN     DDLogFlagWarning
-#define LOG_FLAG_INFO     DDLogFlagInfo
-#define LOG_FLAG_DEBUG    DDLogFlagDebug
-#define LOG_FLAG_VERBOSE  DDLogFlagVerbose
+#define LOG_FLAG_ERROR    TMPLogFlagError
+#define LOG_FLAG_WARN     TMPLogFlagWarning
+#define LOG_FLAG_INFO     TMPLogFlagInfo
+#define LOG_FLAG_DEBUG    TMPLogFlagDebug
+#define LOG_FLAG_VERBOSE  TMPLogFlagVerbose
 
-#define LOG_LEVEL_OFF     DDLogLevelOff
-#define LOG_LEVEL_ERROR   DDLogLevelError
-#define LOG_LEVEL_WARN    DDLogLevelWarning
-#define LOG_LEVEL_INFO    DDLogLevelInfo
-#define LOG_LEVEL_DEBUG   DDLogLevelDebug
-#define LOG_LEVEL_VERBOSE DDLogLevelVerbose
-#define LOG_LEVEL_ALL     DDLogLevelAll
+#define LOG_LEVEL_OFF     TMPLogLevelOff
+#define LOG_LEVEL_ERROR   TMPLogLevelError
+#define LOG_LEVEL_WARN    TMPLogLevelWarning
+#define LOG_LEVEL_INFO    TMPLogLevelInfo
+#define LOG_LEVEL_DEBUG   TMPLogLevelDebug
+#define LOG_LEVEL_VERBOSE TMPLogLevelVerbose
+#define LOG_LEVEL_ALL     TMPLogLevelAll
 
 #define LOG_ASYNC_ENABLED YES
 
@@ -50,7 +50,7 @@ Disable legacy macros by importing CocoaLumberjack.h or DDLogMacros.h instead of
 #define LOG_ASYNC_VERBOSE  (YES && LOG_ASYNC_ENABLED)
 
 #define LOG_MACRO(isAsynchronous, lvl, flg, ctx, atag, fnct, frmt, ...) \
-        [DDLog log : isAsynchronous                                     \
+        [TMPLog log : isAsynchronous                                     \
              level : lvl                                                \
               flag : flg                                                \
            context : ctx                                                \
@@ -66,10 +66,10 @@ Disable legacy macros by importing CocoaLumberjack.h or DDLogMacros.h instead of
 #define LOG_OBJC_MAYBE(async, lvl, flg, ctx, frmt, ...) \
         LOG_MAYBE(async, lvl, flg, ctx, __PRETTY_FUNCTION__, frmt, ## __VA_ARGS__)
 
-#define DDLogError(frmt, ...)   LOG_OBJC_MAYBE(LOG_ASYNC_ERROR,   LOG_LEVEL_DEF, LOG_FLAG_ERROR,   0, frmt, ##__VA_ARGS__)
-#define DDLogWarn(frmt, ...)    LOG_OBJC_MAYBE(LOG_ASYNC_WARN,    LOG_LEVEL_DEF, LOG_FLAG_WARN,    0, frmt, ##__VA_ARGS__)
-#define DDLogInfo(frmt, ...)    LOG_OBJC_MAYBE(LOG_ASYNC_INFO,    LOG_LEVEL_DEF, LOG_FLAG_INFO,    0, frmt, ##__VA_ARGS__)
-#define DDLogDebug(frmt, ...)   LOG_OBJC_MAYBE(LOG_ASYNC_DEBUG,   LOG_LEVEL_DEF, LOG_FLAG_DEBUG,   0, frmt, ##__VA_ARGS__)
-#define DDLogVerbose(frmt, ...) LOG_OBJC_MAYBE(LOG_ASYNC_VERBOSE, LOG_LEVEL_DEF, LOG_FLAG_VERBOSE, 0, frmt, ##__VA_ARGS__)
+#define TMPLogError(frmt, ...)   LOG_OBJC_MAYBE(LOG_ASYNC_ERROR,   LOG_LEVEL_DEF, LOG_FLAG_ERROR,   0, frmt, ##__VA_ARGS__)
+#define TMPLogWarn(frmt, ...)    LOG_OBJC_MAYBE(LOG_ASYNC_WARN,    LOG_LEVEL_DEF, LOG_FLAG_WARN,    0, frmt, ##__VA_ARGS__)
+#define TMPLogInfo(frmt, ...)    LOG_OBJC_MAYBE(LOG_ASYNC_INFO,    LOG_LEVEL_DEF, LOG_FLAG_INFO,    0, frmt, ##__VA_ARGS__)
+#define TMPLogDebug(frmt, ...)   LOG_OBJC_MAYBE(LOG_ASYNC_DEBUG,   LOG_LEVEL_DEF, LOG_FLAG_DEBUG,   0, frmt, ##__VA_ARGS__)
+#define TMPLogVerbose(frmt, ...) LOG_OBJC_MAYBE(LOG_ASYNC_VERBOSE, LOG_LEVEL_DEF, LOG_FLAG_VERBOSE, 0, frmt, ##__VA_ARGS__)
 
 #endif

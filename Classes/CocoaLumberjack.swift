@@ -13,18 +13,18 @@
 //   to endorse or promote products derived from this software without specific
 //   prior written permission of Deusty, LLC.
 
-extension DDLogFlag {
-    public static func from(_ logLevel: DDLogLevel) -> DDLogFlag {
-        return DDLogFlag(rawValue: logLevel.rawValue)
+extension TMPLogFlag {
+    public static func from(_ logLevel: TMPLogLevel) -> TMPLogFlag {
+        return TMPLogFlag(rawValue: logLevel.rawValue)
     }
 
-	public init(_ logLevel: DDLogLevel) {
-        self = DDLogFlag(rawValue: logLevel.rawValue)
+	public init(_ logLevel: TMPLogLevel) {
+        self = TMPLogFlag(rawValue: logLevel.rawValue)
 	}
 
     /// Returns the log level, or the lowest equivalent.
-    public func toLogLevel() -> DDLogLevel {
-        if let ourValid = DDLogLevel(rawValue: rawValue) {
+    public func toLogLevel() -> TMPLogLevel {
+        if let ourValid = TMPLogLevel(rawValue: rawValue) {
             return ourValid
         } else {
             if contains(.verbose) {
@@ -44,8 +44,8 @@ extension DDLogFlag {
     }
 }
 
-/// The log level that can dynamically limit log messages (vs. the static DDDefaultLogLevel). This log level will only be checked, if the message passes the `DDDefaultLogLevel`.
-public var dynamicLogLevel = DDLogLevel.all
+/// The log level that can dynamically limit log messages (vs. the static TMPDefaultLogLevel). This log level will only be checked, if the message passes the `TMPDefaultLogLevel`.
+public var dynamicLogLevel = TMPLogLevel.all
 
 /// Resets the `dynamicLogLevel` to `.all`.
 /// - SeeAlso: `dynamicLogLevel`
@@ -55,7 +55,7 @@ public func resetDynamicLogLevel() {
 }
 
 @available(*, deprecated, message: "Please use dynamicLogLevel", renamed: "dynamicLogLevel")
-public var defaultDebugLevel: DDLogLevel {
+public var defaultDebugLevel: TMPLogLevel {
     get {
         return dynamicLogLevel
     }
@@ -73,21 +73,21 @@ public func resetDefaultDebugLevel() {
 public var asyncLoggingEnabled = true
 
 @inlinable
-public func _DDLogMessage(_ message: @autoclosure () -> String,
-                          level: DDLogLevel,
-                          flag: DDLogFlag,
+public func _TMPLogMessage(_ message: @autoclosure () -> String,
+                          level: TMPLogLevel,
+                          flag: TMPLogFlag,
                           context: Int,
                           file: StaticString,
                           function: StaticString,
                           line: UInt,
                           tag: Any?,
                           asynchronous: Bool,
-                          ddlog: DDLog) {
+                          tmplog: TMPLog) {
     // The `dynamicLogLevel` will always be checked here (instead of being passed in).
-    // We cannot "mix" it with the `DDDefaultLogLevel`, because otherwise the compiler won't strip strings that are not logged.
+    // We cannot "mix" it with the `TMPDefaultLogLevel`, because otherwise the compiler won't strip strings that are not logged.
     if level.rawValue & flag.rawValue != 0 && dynamicLogLevel.rawValue & flag.rawValue != 0 {
-        // Tell the DDLogMessage constructor to copy the C strings that get passed to it.
-        let logMessage = DDLogMessage(message: message(),
+        // Tell the TMPLogMessage constructor to copy the C strings that get passed to it.
+        let logMessage = TMPLogMessage(message: message(),
                                       level: level,
                                       flag: flag,
                                       context: context,
@@ -97,73 +97,73 @@ public func _DDLogMessage(_ message: @autoclosure () -> String,
                                       tag: tag,
                                       options: [.copyFile, .copyFunction],
                                       timestamp: nil)
-        ddlog.log(asynchronous: asynchronous, message: logMessage)
+        tmplog.log(asynchronous: asynchronous, message: logMessage)
     }
 }
 
 @inlinable
-public func DDLogDebug(_ message: @autoclosure () -> String,
-                       level: DDLogLevel = DDDefaultLogLevel,
+public func TMPLogDebug(_ message: @autoclosure () -> String,
+                       level: TMPLogLevel = TMPDefaultLogLevel,
                        context: Int = 0,
                        file: StaticString = #file,
                        function: StaticString = #function,
                        line: UInt = #line,
                        tag: Any? = nil,
                        asynchronous async: Bool = asyncLoggingEnabled,
-                       ddlog: DDLog = .sharedInstance) {
-    _DDLogMessage(message(), level: level, flag: .debug, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, ddlog: ddlog)
+                       tmplog: TMPLog = .sharedInstance) {
+    _TMPLogMessage(message(), level: level, flag: .debug, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, tmplog: tmplog)
 }
 
 @inlinable
-public func DDLogInfo(_ message: @autoclosure () -> String,
-                      level: DDLogLevel = DDDefaultLogLevel,
+public func TMPLogInfo(_ message: @autoclosure () -> String,
+                      level: TMPLogLevel = TMPDefaultLogLevel,
                       context: Int = 0,
                       file: StaticString = #file,
                       function: StaticString = #function,
                       line: UInt = #line,
                       tag: Any? = nil,
                       asynchronous async: Bool = asyncLoggingEnabled,
-                      ddlog: DDLog = .sharedInstance) {
-    _DDLogMessage(message(), level: level, flag: .info, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, ddlog: ddlog)
+                      tmplog: TMPLog = .sharedInstance) {
+    _TMPLogMessage(message(), level: level, flag: .info, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, tmplog: tmplog)
 }
 
 @inlinable
-public func DDLogWarn(_ message: @autoclosure () -> String,
-                      level: DDLogLevel = DDDefaultLogLevel,
+public func TMPLogWarn(_ message: @autoclosure () -> String,
+                      level: TMPLogLevel = TMPDefaultLogLevel,
                       context: Int = 0,
                       file: StaticString = #file,
                       function: StaticString = #function,
                       line: UInt = #line,
                       tag: Any? = nil,
                       asynchronous async: Bool = asyncLoggingEnabled,
-                      ddlog: DDLog = .sharedInstance) {
-    _DDLogMessage(message(), level: level, flag: .warning, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, ddlog: ddlog)
+                      tmplog: TMPLog = .sharedInstance) {
+    _TMPLogMessage(message(), level: level, flag: .warning, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, tmplog: tmplog)
 }
 
 @inlinable
-public func DDLogVerbose(_ message: @autoclosure () -> String,
-                         level: DDLogLevel = DDDefaultLogLevel,
+public func TMPLogVerbose(_ message: @autoclosure () -> String,
+                         level: TMPLogLevel = TMPDefaultLogLevel,
                          context: Int = 0,
                          file: StaticString = #file,
                          function: StaticString = #function,
                          line: UInt = #line,
                          tag: Any? = nil,
                          asynchronous async: Bool = asyncLoggingEnabled,
-                         ddlog: DDLog = .sharedInstance) {
-    _DDLogMessage(message(), level: level, flag: .verbose, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, ddlog: ddlog)
+                         tmplog: TMPLog = .sharedInstance) {
+    _TMPLogMessage(message(), level: level, flag: .verbose, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, tmplog: tmplog)
 }
 
 @inlinable
-public func DDLogError(_ message: @autoclosure () -> String,
-                       level: DDLogLevel = DDDefaultLogLevel,
+public func TMPLogError(_ message: @autoclosure () -> String,
+                       level: TMPLogLevel = TMPDefaultLogLevel,
                        context: Int = 0,
                        file: StaticString = #file,
                        function: StaticString = #function,
                        line: UInt = #line,
                        tag: Any? = nil,
                        asynchronous async: Bool = false,
-                       ddlog: DDLog = .sharedInstance) {
-    _DDLogMessage(message(), level: level, flag: .error, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, ddlog: ddlog)
+                       tmplog: TMPLog = .sharedInstance) {
+    _TMPLogMessage(message(), level: level, flag: .error, context: context, file: file, function: function, line: line, tag: tag, asynchronous: async, tmplog: tmplog)
 }
 
 /// Returns a String of the current filename, without full path or extension.

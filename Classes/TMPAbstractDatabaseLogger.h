@@ -14,11 +14,11 @@
 //   prior written permission of Deusty, LLC.
 
 // Disable legacy macros
-#ifndef DD_LEGACY_MACROS
-    #define DD_LEGACY_MACROS 0
+#ifndef TMP_LEGACY_MACROS
+    #define TMP_LEGACY_MACROS 0
 #endif
 
-#import <CocoaLumberjack/DDLog.h>
+#import <CocoaLumberjack/TMPLog.h>
 
 /**
  * This class provides an abstract implementation of a database logger.
@@ -27,7 +27,7 @@
  * All that is needed for a concrete database logger is to extend this class
  * and override the methods in the implementation file that are prefixed with "db_".
  **/
-@interface DDAbstractDatabaseLogger : DDAbstractLogger {
+@interface TMPAbstractDatabaseLogger : TMPAbstractLogger {
     
 @protected
     NSUInteger _saveThreshold;

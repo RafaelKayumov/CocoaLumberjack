@@ -13,14 +13,14 @@
 //   to endorse or promote products derived from this software without specific
 //   prior written permission of Deusty, LLC.
 
-#import "DDAbstractDatabaseLogger.h"
+#import "TMPAbstractDatabaseLogger.h"
 
 
 #if !__has_feature(objc_arc)
 #error This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-@interface DDAbstractDatabaseLogger ()
+@interface TMPAbstractDatabaseLogger ()
 
 - (void)destroySaveTimer;
 - (void)destroyDeleteTimer;
@@ -29,7 +29,7 @@
 
 #pragma mark -
 
-@implementation DDAbstractDatabaseLogger
+@implementation TMPAbstractDatabaseLogger
 
 - (instancetype)init {
     if ((self = [super init])) {
@@ -51,7 +51,7 @@
 #pragma mark Override Me
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)db_log:(__unused DDLogMessage *)logMessage {
+- (BOOL)db_log:(__unused TMPLogMessage *)logMessage {
     // Override me and add your implementation.
     //
     // Return YES if an item was added to the buffer.
@@ -197,8 +197,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (NSUInteger)saveThreshold {
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     // Note: The internal implementation MUST access the colorsEnabled variable directly,
     // This method is designed explicitly for external access.
@@ -210,7 +210,7 @@
     NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
     NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 
-    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
 
     __block NSUInteger result;
 
@@ -241,13 +241,13 @@
         }
     };
 
-    // The design of the setter logic below is taken from the DDAbstractLogger implementation.
-    // For documentation please refer to the DDAbstractLogger implementation.
+    // The design of the setter logic below is taken from the TMPAbstractLogger implementation.
+    // For documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -257,8 +257,8 @@
 }
 
 - (NSTimeInterval)saveInterval {
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     // Note: The internal implementation MUST access the colorsEnabled variable directly,
     // This method is designed explicitly for external access.
@@ -270,7 +270,7 @@
     NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
     NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 
-    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
 
     __block NSTimeInterval result;
 
@@ -332,13 +332,13 @@
         }
     };
 
-    // The design of the setter logic below is taken from the DDAbstractLogger implementation.
-    // For documentation please refer to the DDAbstractLogger implementation.
+    // The design of the setter logic below is taken from the TMPAbstractLogger implementation.
+    // For documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -348,8 +348,8 @@
 }
 
 - (NSTimeInterval)maxAge {
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     // Note: The internal implementation MUST access the colorsEnabled variable directly,
     // This method is designed explicitly for external access.
@@ -361,7 +361,7 @@
     NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
     NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 
-    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
 
     __block NSTimeInterval result;
 
@@ -429,13 +429,13 @@
         }
     };
 
-    // The design of the setter logic below is taken from the DDAbstractLogger implementation.
-    // For documentation please refer to the DDAbstractLogger implementation.
+    // The design of the setter logic below is taken from the TMPAbstractLogger implementation.
+    // For documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -445,8 +445,8 @@
 }
 
 - (NSTimeInterval)deleteInterval {
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     // Note: The internal implementation MUST access the colorsEnabled variable directly,
     // This method is designed explicitly for external access.
@@ -458,7 +458,7 @@
     NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
     NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 
-    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
 
     __block NSTimeInterval result;
 
@@ -519,13 +519,13 @@
         }
     };
 
-    // The design of the setter logic below is taken from the DDAbstractLogger implementation.
-    // For documentation please refer to the DDAbstractLogger implementation.
+    // The design of the setter logic below is taken from the TMPAbstractLogger implementation.
+    // For documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -535,8 +535,8 @@
 }
 
 - (BOOL)deleteOnEverySave {
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     // Note: The internal implementation MUST access the colorsEnabled variable directly,
     // This method is designed explicitly for external access.
@@ -548,7 +548,7 @@
     NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
     NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 
-    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
 
     __block BOOL result;
 
@@ -566,13 +566,13 @@
         self->_deleteOnEverySave = flag;
     };
 
-    // The design of the setter logic below is taken from the DDAbstractLogger implementation.
-    // For documentation please refer to the DDAbstractLogger implementation.
+    // The design of the setter logic below is taken from the TMPAbstractLogger implementation.
+    // For documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -614,7 +614,7 @@
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#pragma mark DDLogger
+#pragma mark TMPLogger
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)didAddLogger {
@@ -634,7 +634,7 @@
     [self destroyDeleteTimer];
 }
 
-- (void)logMessage:(DDLogMessage *)logMessage {
+- (void)logMessage:(TMPLogMessage *)logMessage {
     if ([self db_log:logMessage]) {
         BOOL firstUnsavedEntry = (++_unsavedCount == 1);
 
@@ -648,10 +648,10 @@
 }
 
 - (void)flush {
-    // This method is invoked by DDLog's flushLog method.
+    // This method is invoked by TMPLog's flushLog method.
     //
     // It is called automatically when the application quits,
-    // or if the developer invokes DDLog's flushLog method prior to crashing or something.
+    // or if the developer invokes TMPLog's flushLog method prior to crashing or something.
 
     [self performSaveAndSuspendSaveTimer];
 }

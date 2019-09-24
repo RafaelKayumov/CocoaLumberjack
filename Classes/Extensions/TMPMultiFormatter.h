@@ -16,32 +16,32 @@
 #import <Foundation/Foundation.h>
 
 // Disable legacy macros
-#ifndef DD_LEGACY_MACROS
-    #define DD_LEGACY_MACROS 0
+#ifndef TMP_LEGACY_MACROS
+    #define TMP_LEGACY_MACROS 0
 #endif
 
-#import <CocoaLumberjack/DDLog.h>
+#import <CocoaLumberjack/TMPLog.h>
 
 /**
  * This formatter can be used to chain different formatters together.
  * The log message will processed in the order of the formatters added.
  **/
-@interface DDMultiFormatter : NSObject <DDLogFormatter>
+@interface TMPMultiFormatter : NSObject <TMPLogFormatter>
 
 /**
  *  Array of chained formatters
  */
-@property (readonly) NSArray<id<DDLogFormatter>> *formatters;
+@property (readonly) NSArray<id<TMPLogFormatter>> *formatters;
 
 /**
  *  Add a new formatter
  */
-- (void)addFormatter:(id<DDLogFormatter>)formatter NS_SWIFT_NAME(add(_:));
+- (void)addFormatter:(id<TMPLogFormatter>)formatter NS_SWIFT_NAME(add(_:));
 
 /**
  *  Remove a formatter
  */
-- (void)removeFormatter:(id<DDLogFormatter>)formatter NS_SWIFT_NAME(remove(_:));
+- (void)removeFormatter:(id<TMPLogFormatter>)formatter NS_SWIFT_NAME(remove(_:));
 
 /**
  *  Remove all existing formatters
@@ -51,6 +51,6 @@
 /**
  *  Check if a certain formatter is used
  */
-- (BOOL)isFormattingWithFormatter:(id<DDLogFormatter>)formatter;
+- (BOOL)isFormattingWithFormatter:(id<TMPLogFormatter>)formatter;
 
 @end

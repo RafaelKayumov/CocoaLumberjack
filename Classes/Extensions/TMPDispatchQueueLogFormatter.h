@@ -16,26 +16,26 @@
 #import <Foundation/Foundation.h>
 
 // Disable legacy macros
-#ifndef DD_LEGACY_MACROS
-    #define DD_LEGACY_MACROS 0
+#ifndef TMP_LEGACY_MACROS
+    #define TMP_LEGACY_MACROS 0
 #endif
 
-#import <CocoaLumberjack/DDLog.h>
+#import <CocoaLumberjack/TMPLog.h>
 
 /**
  *  Log formatter mode
  */
-typedef NS_ENUM(NSUInteger, DDDispatchQueueLogFormatterMode){
+typedef NS_ENUM(NSUInteger, TMPDispatchQueueLogFormatterMode){
     /**
      *  This is the default option, means the formatter can be reused between multiple loggers and therefore is thread-safe.
      *  There is, of course, a performance cost for the thread-safety
      */
-    DDDispatchQueueLogFormatterModeShareble = 0,
+    TMPDispatchQueueLogFormatterModeShareble = 0,
     /**
      *  If the formatter will only be used by a single logger, then the thread-safety can be removed
      *  @note: there is an assert checking if the formatter is added to multiple loggers and the mode is non-shareble
      */
-    DDDispatchQueueLogFormatterModeNonShareble,
+    TMPDispatchQueueLogFormatterModeNonShareble,
 };
 
 
@@ -46,7 +46,7 @@ typedef NS_ENUM(NSUInteger, DDDispatchQueueLogFormatterMode){
  * You can learn more about log formatters here:
  * Documentation/CustomFormatters.md
  *
- * A typical `NSLog` (or `DDTTYLogger`) prints detailed info as `[<process_id>:<thread_id>]`.
+ * A typical `NSLog` (or `TMPTTYLogger`) prints detailed info as `[<process_id>:<thread_id>]`.
  * For example:
  *
  * `2011-10-17 20:21:45.435 AppName[19928:5207] Your log message here`
@@ -76,7 +76,7 @@ typedef NS_ENUM(NSUInteger, DDDispatchQueueLogFormatterMode){
  * Note: If manually creating your own background threads (via `NSThread/alloc/init` or `NSThread/detachNeThread`),
  * you can use `[[NSThread currentThread] setName:(NSString *)]`.
  **/
-@interface DDDispatchQueueLogFormatter : NSObject <DDLogFormatter>
+@interface TMPDispatchQueueLogFormatter : NSObject <TMPLogFormatter>
 
 /**
  * Standard init method.
@@ -87,9 +87,9 @@ typedef NS_ENUM(NSUInteger, DDDispatchQueueLogFormatterMode){
 /**
  *  Initializer with ability to set the queue mode
  *
- *  @param mode choose between DDDispatchQueueLogFormatterModeShareble and DDDispatchQueueLogFormatterModeNonShareble, depending if the formatter is shared between several loggers or not
+ *  @param mode choose between TMPDispatchQueueLogFormatterModeShareble and TMPDispatchQueueLogFormatterModeNonShareble, depending if the formatter is shared between several loggers or not
  */
-- (instancetype)initWithMode:(DDDispatchQueueLogFormatterMode)mode;
+- (instancetype)initWithMode:(TMPDispatchQueueLogFormatterMode)mode;
 
 /**
  * The minQueueLength restricts the minimum size of the [detail box].
@@ -150,9 +150,9 @@ typedef NS_ENUM(NSUInteger, DDDispatchQueueLogFormatterMode){
 @end
 
 /**
- *  Category on `DDDispatchQueueLogFormatter` to make method declarations easier to extend/modify
+ *  Category on `TMPDispatchQueueLogFormatter` to make method declarations easier to extend/modify
  **/
-@interface DDDispatchQueueLogFormatter (OverridableMethods)
+@interface TMPDispatchQueueLogFormatter (OverridableMethods)
 
 /**
  *  Date formatter default configuration
@@ -167,18 +167,18 @@ typedef NS_ENUM(NSUInteger, DDDispatchQueueLogFormatterMode){
 /**
  *  Method to compute the queue thread label
  */
-- (NSString *)queueThreadLabelForLogMessage:(DDLogMessage *)logMessage;
+- (NSString *)queueThreadLabelForLogMessage:(TMPLogMessage *)logMessage;
 
 /**
- *  The actual method that formats a message (transforms a `DDLogMessage` model into a printable string)
+ *  The actual method that formats a message (transforms a `TMPLogMessage` model into a printable string)
  */
-- (NSString *)formatLogMessage:(DDLogMessage *)logMessage;
+- (NSString *)formatLogMessage:(TMPLogMessage *)logMessage;
 
 @end
 
-#pragma mark - DDAtomicCounter
+#pragma mark - TMPAtomicCounter
 
-@protocol DDAtomicCountable <NSObject>
+@protocol TMPAtomicCountable <NSObject>
 
 - (instancetype)initWithDefaultValue:(int32_t)defaultValue;
 - (int32_t)increment;
@@ -187,5 +187,5 @@ typedef NS_ENUM(NSUInteger, DDDispatchQueueLogFormatterMode){
 
 @end
 
-@interface DDAtomicCounter: NSObject<DDAtomicCountable>
+@interface TMPAtomicCounter: NSObject<TMPAtomicCountable>
 @end

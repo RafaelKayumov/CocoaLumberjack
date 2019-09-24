@@ -13,7 +13,7 @@
 //   to endorse or promote products derived from this software without specific
 //   prior written permission of Deusty, LLC.
 
-#import "DDTTYLogger.h"
+#import "TMPTTYLogger.h"
 
 #import <sys/uio.h>
 
@@ -21,22 +21,22 @@
 #error This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
 #endif
 
-// We probably shouldn't be using DDLog() statements within the DDLog implementation.
+// We probably shouldn't be using TMPLog() statements within the TMPLog implementation.
 // But we still want to leave our log statements for any future debugging,
 // and to allow other developers to trace the implementation (which is a great learning tool).
 //
 // So we use primitive logging macros around NSLog.
 // We maintain the NS prefix on the macros to be explicit about the fact that we're using NSLog.
 
-#ifndef DD_NSLOG_LEVEL
-    #define DD_NSLOG_LEVEL 2
+#ifndef TMP_NSLOG_LEVEL
+    #define TMP_NSLOG_LEVEL 2
 #endif
 
-#define NSLogError(frmt, ...)    do{ if(DD_NSLOG_LEVEL >= 1) NSLog((frmt), ##__VA_ARGS__); } while(0)
-#define NSLogWarn(frmt, ...)     do{ if(DD_NSLOG_LEVEL >= 2) NSLog((frmt), ##__VA_ARGS__); } while(0)
-#define NSLogInfo(frmt, ...)     do{ if(DD_NSLOG_LEVEL >= 3) NSLog((frmt), ##__VA_ARGS__); } while(0)
-#define NSLogDebug(frmt, ...)    do{ if(DD_NSLOG_LEVEL >= 4) NSLog((frmt), ##__VA_ARGS__); } while(0)
-#define NSLogVerbose(frmt, ...)  do{ if(DD_NSLOG_LEVEL >= 5) NSLog((frmt), ##__VA_ARGS__); } while(0)
+#define NSLogError(frmt, ...)    do{ if(TMP_NSLOG_LEVEL >= 1) NSLog((frmt), ##__VA_ARGS__); } while(0)
+#define NSLogWarn(frmt, ...)     do{ if(TMP_NSLOG_LEVEL >= 2) NSLog((frmt), ##__VA_ARGS__); } while(0)
+#define NSLogInfo(frmt, ...)     do{ if(TMP_NSLOG_LEVEL >= 3) NSLog((frmt), ##__VA_ARGS__); } while(0)
+#define NSLogDebug(frmt, ...)    do{ if(TMP_NSLOG_LEVEL >= 4) NSLog((frmt), ##__VA_ARGS__); } while(0)
+#define NSLogVerbose(frmt, ...)  do{ if(TMP_NSLOG_LEVEL >= 5) NSLog((frmt), ##__VA_ARGS__); } while(0)
 
 // Xcode does NOT natively support colors in the Xcode debugging console.
 // You'll need to install the XcodeColors plugin to see colors in the Xcode console.
@@ -82,11 +82,11 @@ typedef struct {
   uint8_t r;
   uint8_t g;
   uint8_t b;
-} DDRGBColor;
+} TMPRGBColor;
 
-@interface DDTTYLoggerColorProfile : NSObject {
+@interface TMPTTYLoggerColorProfile : NSObject {
     @public
-    DDLogFlag mask;
+    TMPLogFlag mask;
     NSInteger context;
 
     uint8_t fg_r;
@@ -113,7 +113,7 @@ typedef struct {
     size_t resetCodeLen;
 }
 
-- (instancetype)initWithForegroundColor:(DDColor *)fgColor backgroundColor:(DDColor *)bgColor flag:(DDLogFlag)mask context:(NSInteger)ctxt;
+- (instancetype)initWithForegroundColor:(TMPColor *)fgColor backgroundColor:(TMPColor *)bgColor flag:(TMPLogFlag)mask context:(NSInteger)ctxt;
 
 @end
 
@@ -121,7 +121,7 @@ typedef struct {
 #pragma mark -
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface DDTTYLogger () {
+@interface TMPTTYLogger () {
     NSString *_appName;
     char *_app;
     size_t _appLen;
@@ -138,7 +138,7 @@ typedef struct {
 @end
 
 
-@implementation DDTTYLogger
+@implementation TMPTTYLogger
 
 static BOOL isaColorTTY;
 static BOOL isaColor256TTY;
@@ -148,7 +148,7 @@ static NSArray *codes_fg = nil;
 static NSArray *codes_bg = nil;
 static NSArray *colors   = nil;
 
-static DDTTYLogger *sharedInstance;
+static TMPTTYLogger *sharedInstance;
 
 /**
  * Initializes the colors array, as well as the codes_fg and codes_bg arrays, for 16 color mode.
@@ -211,7 +211,7 @@ static DDTTYLogger *sharedInstance;
     // Standard Terminal.app colors:
     //
     // These are the default colors used by Apple's Terminal.app.
-    DDRGBColor rgbColors[] = {
+    TMPRGBColor rgbColors[] = {
         {  0,   0,   0}, // normal - black
         {194,  54,  33}, // normal - red
         { 37, 188,  36}, // normal - green
@@ -236,7 +236,7 @@ static DDTTYLogger *sharedInstance;
     //
     // These are the default colors used by most xterm shells.
 
-    DDRGBColor rgbColors[] = {
+    TMPRGBColor rgbColors[] = {
         {  0,   0,   0}, // normal - black
         {205,   0,   0}, // normal - red
         {  0, 205,   0}, // normal - green
@@ -257,7 +257,7 @@ static DDTTYLogger *sharedInstance;
 #endif /* if MAP_TO_TERMINAL_APP_COLORS */
 
     for (size_t i = 0; i < sizeof(rgbColors) / sizeof(rgbColors[0]); ++i) {
-        [m_colors addObject:DDMakeColor(rgbColors[i].r, rgbColors[i].g, rgbColors[i].b)];
+        [m_colors addObject:TMPMakeColor(rgbColors[i].r, rgbColors[i].g, rgbColors[i].b)];
     }
     colors   = [m_colors   copy];
 
@@ -307,7 +307,7 @@ static DDTTYLogger *sharedInstance;
     // http://en.wikipedia.org/wiki/ANSI_escape_code
 
     // Colors
-    DDRGBColor rgbColors[] = {
+    TMPRGBColor rgbColors[] = {
         { 47,  49,  49},
         { 60,  42, 144},
         { 66,  44, 183},
@@ -592,7 +592,7 @@ static DDTTYLogger *sharedInstance;
     };
 
     for (size_t i = 0; i < sizeof(rgbColors) / sizeof(rgbColors[0]); ++i) {
-        [m_colors addObject:DDMakeColor(rgbColors[i].r, rgbColors[i].g, rgbColors[i].b)];
+        [m_colors addObject:TMPMakeColor(rgbColors[i].r, rgbColors[i].g, rgbColors[i].b)];
     }
 
     // Color codes
@@ -654,7 +654,7 @@ static DDTTYLogger *sharedInstance;
 
                 [m_codes_fg addObject:[NSString stringWithFormat:@"38;5;%dm", index]];
                 [m_codes_bg addObject:[NSString stringWithFormat:@"48;5;%dm", index]];
-                [m_colors addObject:DDMakeColor(r, g, b)];
+                [m_colors addObject:TMPMakeColor(r, g, b)];
 
                 index++;
             }
@@ -670,7 +670,7 @@ static DDTTYLogger *sharedInstance;
     while (index < 256) {
         [m_codes_fg addObject:[NSString stringWithFormat:@"38;5;%dm", index]];
         [m_codes_bg addObject:[NSString stringWithFormat:@"48;5;%dm", index]];
-        [m_colors addObject:DDMakeColor(r, g, b)];
+        [m_colors addObject:TMPMakeColor(r, g, b)];
 
         r += 10;
         g += 10;
@@ -689,7 +689,7 @@ static DDTTYLogger *sharedInstance;
     NSAssert([codes_fg count] == [colors count],   @"Invalid colors/codes array(s)");
 }
 
-+ (void)getRed:(CGFloat *)rPtr green:(CGFloat *)gPtr blue:(CGFloat *)bPtr fromColor:(DDColor *)color {
++ (void)getRed:(CGFloat *)rPtr green:(CGFloat *)gPtr blue:(CGFloat *)bPtr fromColor:(TMPColor *)color {
     #if TARGET_OS_IPHONE
 
     // iOS
@@ -728,7 +728,7 @@ static DDTTYLogger *sharedInstance;
         CGColorSpaceRelease(rgbColorSpace);
     }
 
-    #elif defined(DD_CLI) || !__has_include(<AppKit/NSColor.h>)
+    #elif defined(TMP_CLI) || !__has_include(<AppKit/NSColor.h>)
 
     // OS X without AppKit
 
@@ -752,7 +752,7 @@ static DDTTYLogger *sharedInstance;
  * The array index of that color, within the colors array, is then returned.
  * This array index may also be used as the index within the codes_fg and codes_bg arrays.
  **/
-+ (NSUInteger)codeIndexForColor:(DDColor *)inColor {
++ (NSUInteger)codeIndexForColor:(TMPColor *)inColor {
     CGFloat inR, inG, inB;
 
     [self getRed:&inR green:&inG blue:&inB fromColor:inColor];
@@ -762,7 +762,7 @@ static DDTTYLogger *sharedInstance;
 
     NSUInteger i = 0;
 
-    for (DDColor *color in colors) {
+    for (TMPColor *color in colors) {
         // Calculate Euclidean distance (lower value means closer to given color)
 
         CGFloat r, g, b;
@@ -774,14 +774,14 @@ static DDTTYLogger *sharedInstance;
         CGFloat distance = sqrtf(powf(r - inR, 2.0f) + powf(g - inG, 2.0f) + powf(b - inB, 2.0f));
     #endif
 
-        NSLogVerbose(@"DDTTYLogger: %3lu : %.3f,%.3f,%.3f & %.3f,%.3f,%.3f = %.6f",
+        NSLogVerbose(@"TMPTTYLogger: %3lu : %.3f,%.3f,%.3f & %.3f,%.3f,%.3f = %.6f",
                      (unsigned long)i, inR, inG, inB, r, g, b, distance);
 
         if (distance < lowestDistance) {
             bestIndex = i;
             lowestDistance = distance;
 
-            NSLogVerbose(@"DDTTYLogger: New best index = %lu", (unsigned long)bestIndex);
+            NSLogVerbose(@"TMPTTYLogger: New best index = %lu", (unsigned long)bestIndex);
         }
 
         i++;
@@ -791,9 +791,9 @@ static DDTTYLogger *sharedInstance;
 }
 
 + (instancetype)sharedInstance {
-    static dispatch_once_t DDTTYLoggerOnceToken;
+    static dispatch_once_t TMPTTYLoggerOnceToken;
 
-    dispatch_once(&DDTTYLoggerOnceToken, ^{
+    dispatch_once(&TMPTTYLoggerOnceToken, ^{
         // Xcode does NOT natively support colors in the Xcode debugging console.
         // You'll need to install the XcodeColors plugin to see colors in the Xcode console.
         //
@@ -817,9 +817,9 @@ static DDTTYLogger *sharedInstance;
             }
         }
 
-        NSLogInfo(@"DDTTYLogger: isaColorTTY = %@", (isaColorTTY ? @"YES" : @"NO"));
-        NSLogInfo(@"DDTTYLogger: isaColor256TTY: %@", (isaColor256TTY ? @"YES" : @"NO"));
-        NSLogInfo(@"DDTTYLogger: isaXcodeColorTTY: %@", (isaXcodeColorTTY ? @"YES" : @"NO"));
+        NSLogInfo(@"TMPTTYLogger: isaColorTTY = %@", (isaColorTTY ? @"YES" : @"NO"));
+        NSLogInfo(@"TMPTTYLogger: isaColor256TTY: %@", (isaColor256TTY ? @"YES" : @"NO"));
+        NSLogInfo(@"TMPTTYLogger: isaXcodeColorTTY: %@", (isaXcodeColorTTY ? @"YES" : @"NO"));
 
         sharedInstance = [[[self class] alloc] init];
     });
@@ -890,13 +890,13 @@ static DDTTYLogger *sharedInstance;
 }
 
 - (void)loadDefaultColorProfiles {
-    [self setForegroundColor:DDMakeColor(214,  57,  30) backgroundColor:nil forFlag:DDLogFlagError];
-    [self setForegroundColor:DDMakeColor(204, 121,  32) backgroundColor:nil forFlag:DDLogFlagWarning];
+    [self setForegroundColor:TMPMakeColor(214,  57,  30) backgroundColor:nil forFlag:TMPLogFlagError];
+    [self setForegroundColor:TMPMakeColor(204, 121,  32) backgroundColor:nil forFlag:TMPLogFlagWarning];
 }
 
 - (BOOL)colorsEnabled {
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     // Note: The internal implementation MUST access the colorsEnabled variable directly,
     // This method is designed explicitly for external access.
@@ -908,7 +908,7 @@ static DDTTYLogger *sharedInstance;
     NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
     NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 
-    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
 
     __block BOOL result;
 
@@ -932,8 +932,8 @@ static DDTTYLogger *sharedInstance;
         }
     };
 
-    // The design of this method is taken from the DDAbstractLogger implementation.
-    // For extensive documentation please refer to the DDAbstractLogger implementation.
+    // The design of this method is taken from the TMPAbstractLogger implementation.
+    // For extensive documentation please refer to the TMPAbstractLogger implementation.
 
     // Note: The internal implementation MUST access the colorsEnabled variable directly,
     // This method is designed explicitly for external access.
@@ -945,31 +945,31 @@ static DDTTYLogger *sharedInstance;
     NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
     NSAssert(![self isOnInternalLoggerQueue], @"MUST access ivar directly, NOT via self.* syntax.");
 
-    dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+    dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
 
     dispatch_async(globalLoggingQueue, ^{
         dispatch_async(self.loggerQueue, block);
     });
 }
 
-- (void)setForegroundColor:(DDColor *)txtColor backgroundColor:(DDColor *)bgColor forFlag:(DDLogFlag)mask {
+- (void)setForegroundColor:(TMPColor *)txtColor backgroundColor:(TMPColor *)bgColor forFlag:(TMPLogFlag)mask {
     [self setForegroundColor:txtColor backgroundColor:bgColor forFlag:mask context:LOG_CONTEXT_ALL];
 }
 
-- (void)setForegroundColor:(DDColor *)txtColor backgroundColor:(DDColor *)bgColor forFlag:(DDLogFlag)mask context:(NSInteger)ctxt {
+- (void)setForegroundColor:(TMPColor *)txtColor backgroundColor:(TMPColor *)bgColor forFlag:(TMPLogFlag)mask context:(NSInteger)ctxt {
     dispatch_block_t block = ^{
         @autoreleasepool {
-            DDTTYLoggerColorProfile *newColorProfile =
-                [[DDTTYLoggerColorProfile alloc] initWithForegroundColor:txtColor
+            TMPTTYLoggerColorProfile *newColorProfile =
+                [[TMPTTYLoggerColorProfile alloc] initWithForegroundColor:txtColor
                                                          backgroundColor:bgColor
                                                                     flag:mask
                                                                  context:ctxt];
 
-            NSLogInfo(@"DDTTYLogger: newColorProfile: %@", newColorProfile);
+            NSLogInfo(@"TMPTTYLogger: newColorProfile: %@", newColorProfile);
 
             NSUInteger i = 0;
 
-            for (DDTTYLoggerColorProfile *colorProfile in self->_colorProfilesArray) {
+            for (TMPTTYLoggerColorProfile *colorProfile in self->_colorProfilesArray) {
                 if ((colorProfile->mask == mask) && (colorProfile->context == ctxt)) {
                     break;
                 }
@@ -985,13 +985,13 @@ static DDTTYLogger *sharedInstance;
         }
     };
 
-    // The design of the setter logic below is taken from the DDAbstractLogger implementation.
-    // For documentation please refer to the DDAbstractLogger implementation.
+    // The design of the setter logic below is taken from the TMPAbstractLogger implementation.
+    // For documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -1000,30 +1000,30 @@ static DDTTYLogger *sharedInstance;
     }
 }
 
-- (void)setForegroundColor:(DDColor *)txtColor backgroundColor:(DDColor *)bgColor forTag:(id <NSCopying>)tag {
+- (void)setForegroundColor:(TMPColor *)txtColor backgroundColor:(TMPColor *)bgColor forTag:(id <NSCopying>)tag {
     NSAssert([(id < NSObject >) tag conformsToProtocol: @protocol(NSCopying)], @"Invalid tag");
 
     dispatch_block_t block = ^{
         @autoreleasepool {
-            DDTTYLoggerColorProfile *newColorProfile =
-                [[DDTTYLoggerColorProfile alloc] initWithForegroundColor:txtColor
+            TMPTTYLoggerColorProfile *newColorProfile =
+                [[TMPTTYLoggerColorProfile alloc] initWithForegroundColor:txtColor
                                                          backgroundColor:bgColor
-                                                                    flag:(DDLogFlag)0
+                                                                    flag:(TMPLogFlag)0
                                                                  context:0];
 
-            NSLogInfo(@"DDTTYLogger: newColorProfile: %@", newColorProfile);
+            NSLogInfo(@"TMPTTYLogger: newColorProfile: %@", newColorProfile);
 
             self->_colorProfilesDict[tag] = newColorProfile;
         }
     };
 
-    // The design of the setter logic below is taken from the DDAbstractLogger implementation.
-    // For documentation please refer to the DDAbstractLogger implementation.
+    // The design of the setter logic below is taken from the TMPAbstractLogger implementation.
+    // For documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -1032,16 +1032,16 @@ static DDTTYLogger *sharedInstance;
     }
 }
 
-- (void)clearColorsForFlag:(DDLogFlag)mask {
+- (void)clearColorsForFlag:(TMPLogFlag)mask {
     [self clearColorsForFlag:mask context:0];
 }
 
-- (void)clearColorsForFlag:(DDLogFlag)mask context:(NSInteger)context {
+- (void)clearColorsForFlag:(TMPLogFlag)mask context:(NSInteger)context {
     dispatch_block_t block = ^{
         @autoreleasepool {
             NSUInteger i = 0;
 
-            for (DDTTYLoggerColorProfile *colorProfile in self->_colorProfilesArray) {
+            for (TMPTTYLoggerColorProfile *colorProfile in self->_colorProfilesArray) {
                 if ((colorProfile->mask == mask) && (colorProfile->context == context)) {
                     break;
                 }
@@ -1055,13 +1055,13 @@ static DDTTYLogger *sharedInstance;
         }
     };
 
-    // The design of the setter logic below is taken from the DDAbstractLogger implementation.
-    // For documentation please refer to the DDAbstractLogger implementation.
+    // The design of the setter logic below is taken from the TMPAbstractLogger implementation.
+    // For documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -1079,13 +1079,13 @@ static DDTTYLogger *sharedInstance;
         }
     };
 
-    // The design of the setter logic below is taken from the DDAbstractLogger implementation.
-    // For documentation please refer to the DDAbstractLogger implementation.
+    // The design of the setter logic below is taken from the TMPAbstractLogger implementation.
+    // For documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -1101,13 +1101,13 @@ static DDTTYLogger *sharedInstance;
         }
     };
 
-    // The design of the setter logic below is taken from the DDAbstractLogger implementation.
-    // For documentation please refer to the DDAbstractLogger implementation.
+    // The design of the setter logic below is taken from the TMPAbstractLogger implementation.
+    // For documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -1123,13 +1123,13 @@ static DDTTYLogger *sharedInstance;
         }
     };
 
-    // The design of the setter logic below is taken from the DDAbstractLogger implementation.
-    // For documentation please refer to the DDAbstractLogger implementation.
+    // The design of the setter logic below is taken from the TMPAbstractLogger implementation.
+    // For documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -1146,13 +1146,13 @@ static DDTTYLogger *sharedInstance;
         }
     };
 
-    // The design of the setter logic below is taken from the DDAbstractLogger implementation.
-    // For documentation please refer to the DDAbstractLogger implementation.
+    // The design of the setter logic below is taken from the TMPAbstractLogger implementation.
+    // For documentation please refer to the TMPAbstractLogger implementation.
 
     if ([self isOnInternalLoggerQueue]) {
         block();
     } else {
-        dispatch_queue_t globalLoggingQueue = [DDLog loggingQueue];
+        dispatch_queue_t globalLoggingQueue = [TMPLog loggingQueue];
         NSAssert(![self isOnGlobalLoggingQueue], @"Core architecture requirement failure");
 
         dispatch_async(globalLoggingQueue, ^{
@@ -1161,7 +1161,7 @@ static DDTTYLogger *sharedInstance;
     }
 }
 
-- (void)logMessage:(DDLogMessage *)logMessage {
+- (void)logMessage:(TMPLogMessage *)logMessage {
     NSString *logMsg = logMessage->_message;
     BOOL isFormatted = NO;
 
@@ -1173,7 +1173,7 @@ static DDTTYLogger *sharedInstance;
     if (logMsg) {
         // Search for a color profile associated with the log message
 
-        DDTTYLoggerColorProfile *colorProfile = nil;
+        TMPTTYLoggerColorProfile *colorProfile = nil;
 
         if (_colorsEnabled) {
             if (logMessage->_tag) {
@@ -1181,7 +1181,7 @@ static DDTTYLogger *sharedInstance;
             }
 
             if (colorProfile == nil) {
-                for (DDTTYLoggerColorProfile *cp in _colorProfilesArray) {
+                for (TMPTTYLoggerColorProfile *cp in _colorProfilesArray) {
                     if (logMessage->_flag & cp->mask) {
                         // Color profile set for this context?
                         if (logMessage->_context == cp->context) {
@@ -1366,17 +1366,17 @@ static DDTTYLogger *sharedInstance;
     }
 }
 
-- (DDLoggerName)loggerName {
-    return DDLoggerNameTTY;
+- (TMPLoggerName)loggerName {
+    return TMPLoggerNameTTY;
 }
 
 @end
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@implementation DDTTYLoggerColorProfile
+@implementation TMPTTYLoggerColorProfile
 
-- (instancetype)initWithForegroundColor:(DDColor *)fgColor backgroundColor:(DDColor *)bgColor flag:(DDLogFlag)aMask context:(NSInteger)ctxt {
+- (instancetype)initWithForegroundColor:(TMPColor *)fgColor backgroundColor:(TMPColor *)bgColor flag:(TMPLogFlag)aMask context:(NSInteger)ctxt {
     if ((self = [super init])) {
         mask = aMask;
         context = ctxt;
@@ -1384,7 +1384,7 @@ static DDTTYLogger *sharedInstance;
         CGFloat r, g, b;
 
         if (fgColor) {
-            [DDTTYLogger getRed:&r green:&g blue:&b fromColor:fgColor];
+            [TMPTTYLogger getRed:&r green:&g blue:&b fromColor:fgColor];
 
             fg_r = (uint8_t)(r * 255.0f);
             fg_g = (uint8_t)(g * 255.0f);
@@ -1392,7 +1392,7 @@ static DDTTYLogger *sharedInstance;
         }
 
         if (bgColor) {
-            [DDTTYLogger getRed:&r green:&g blue:&b fromColor:bgColor];
+            [TMPTTYLogger getRed:&r green:&g blue:&b fromColor:bgColor];
 
             bg_r = (uint8_t)(r * 255.0f);
             bg_g = (uint8_t)(g * 255.0f);
@@ -1402,7 +1402,7 @@ static DDTTYLogger *sharedInstance;
         if (fgColor && isaColorTTY) {
             // Map foreground color to closest available shell color
 
-            fgCodeIndex = [DDTTYLogger codeIndexForColor:fgColor];
+            fgCodeIndex = [TMPTTYLogger codeIndexForColor:fgColor];
             fgCodeRaw   = codes_fg[fgCodeIndex];
 
             NSString *escapeSeq = @"\033[";
@@ -1435,7 +1435,7 @@ static DDTTYLogger *sharedInstance;
         if (bgColor && isaColorTTY) {
             // Map background color to closest available shell color
 
-            bgCodeIndex = [DDTTYLogger codeIndexForColor:bgColor];
+            bgCodeIndex = [TMPTTYLogger codeIndexForColor:bgColor];
             bgCodeRaw   = codes_bg[bgCodeIndex];
 
             NSString *escapeSeq = @"\033[";
@@ -1480,7 +1480,7 @@ static DDTTYLogger *sharedInstance;
 
 - (NSString *)description {
     return [NSString stringWithFormat:
-            @"<DDTTYLoggerColorProfile: %p mask:%i ctxt:%ld fg:%u,%u,%u bg:%u,%u,%u fgCode:%@ bgCode:%@>",
+            @"<TMPTTYLoggerColorProfile: %p mask:%i ctxt:%ld fg:%u,%u,%u bg:%u,%u,%u fgCode:%@ bgCode:%@>",
             self, (int)mask, (long)context, fg_r, fg_g, fg_b, bg_r, bg_g, bg_b, fgCodeRaw, bgCodeRaw];
 }
 
